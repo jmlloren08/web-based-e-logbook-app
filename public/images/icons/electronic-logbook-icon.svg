@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background tablet/device -->
+  <rect x="25" y="30" width="150" height="140" rx="10" fill="#3A86FF" stroke="#1D5FC1" stroke-width="3"/>
+  
+  <!-- Screen -->
+  <rect x="35" y="40" width="130" height="100" rx="5" fill="#EDF2FB" stroke="#D7E3FC" stroke-width="2"/>
+  
+  <!-- Digital log lines -->
+  <line x1="45" y1="60" x2="155" y2="60" stroke="#BFCEF2" stroke-width="2"/>
+  <line x1="45" y1="80" x2="155" y2="80" stroke="#BFCEF2" stroke-width="2"/>
+  <line x1="45" y1="100" x2="155" y2="100" stroke="#BFCEF2" stroke-width="2"/>
+  <line x1="45" y1="120" x2="155" y2="120" stroke="#BFCEF2" stroke-width="2"/>
+  
+  <!-- Entries on log lines -->
+  <text x="48" y="55" font-family="Arial" font-size="8" fill="#1E429F">03/29/2025</text>
+  <text x="100" y="55" font-family="Arial" font-size="8" fill="#1E429F">Document #A2547</text>
+  
+  <text x="48" y="75" font-family="Arial" font-size="8" fill="#1E429F">03/28/2025</text>
+  <text x="100" y="75" font-family="Arial" font-size="8" fill="#1E429F">Log Check</text>
+  
+  <text x="48" y="95" font-family="Arial" font-size="8" fill="#1E429F">03/27/2025</text>
+  <text x="100" y="95" font-family="Arial" font-size="8" fill="#1E429F">Memo #B1089</text>
+  
+  <text x="48" y="115" font-family="Arial" font-size="8" fill="#1E429F">03/26/2025</text>
+  <text x="100" y="115" font-family="Arial" font-size="8" fill="#1E429F">eBOSS Inspection</text>
+  
+  <!-- Checkmarks -->
+  <path d="M140 53 L145 58 L155 48" stroke="#4CAF50" stroke-width="2" fill="none"/>
+  <path d="M140 73 L145 78 L155 68" stroke="#4CAF50" stroke-width="2" fill="none"/>
+  <path d="M140 93 L145 98 L155 88" stroke="#4CAF50" stroke-width="2" fill="none"/>
+  <path d="M140 113 L145 118 L155 108" stroke="#4CAF50" stroke-width="2" fill="none"/>
+  
+  <!-- Navigation buttons -->
+  <rect x="55" y="150" width="30" height="10" rx="3" fill="#1D5FC1"/>
+  <rect x="95" y="150" width="30" height="10" rx="3" fill="#1D5FC1"/>
+  <rect x="135" y="150" width="30" height="10" rx="3" fill="#1D5FC1"/>
+  
+  <!-- Electronic circuit elements -->
+  <line x1="20" y1="170" x2="40" y2="170" stroke="#FFBE0B" stroke-width="2"/>
+  <line x1="20" y1="180" x2="40" y2="180" stroke="#FFBE0B" stroke-width="2"/>
+  <line x1="20" y1="170" x2="20" y2="180" stroke="#FFBE0B" stroke-width="2"/>
+  <line x1="40" y1="170" x2="40" y2="180" stroke="#FFBE0B" stroke-width="2"/>
+  
+  <circle cx="180" cy="175" r="5" fill="#FFBE0B"/>
+  <line x1="160" y1="175" x2="175" y2="175" stroke="#FFBE0B" stroke-width="2"/>
+</svg>

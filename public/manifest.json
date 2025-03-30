@@ -1,0 +1,29 @@
+{
+    "name": "eLogbook",
+    "short_name": "eLogbook",
+    "background_color": "#6777ef",
+    "display": "fullscreen",
+    "description": "Track and manage documents efficiently.",
+    "theme_color": "#6777ef",
+    "screenshots": [
+        {
+            "src": "/images/screenshots/desktop-1334-750.jpg",
+            "sizes": "1334x750",
+            "type": "image/jpg",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/images/screenshots/mobile-640-1136.jpg",
+            "sizes": "640x1136",
+            "type": "image/jpg"
+        }
+    ],
+    "start_url": "/",
+    "icons": [
+        {
+            "src": "/images/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
