@@ -88,7 +88,7 @@ export default function Show({ document, incomingDocument, outgoingDocument }: {
                                         <div>
                                             <strong>Signature:</strong>
                                             <img
-                                                src={`/storage/${outgoingDocument.signature_path}`}
+                                                src={`/public/public/${outgoingDocument.signature_path}`}
                                                 alt="Signature"
                                                 className="max-w-[200px] mt-2"
                                             />

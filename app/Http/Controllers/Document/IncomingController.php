@@ -124,19 +124,16 @@ class IncomingController extends Controller
         try {
 
             $request->validate([
-                'type' => 'required|in:outgoing',
                 'document_id' => 'required|string',
-                'date_released' => 'required_if:type,outgoing',
-                'forwarded_to_office_department_unit' => 'required_if:type,outgoing',
+                'date_released' => 'required|date',
+                'forwarded_to_office_department_unit' => 'required|string',
             ]);
 
-            if ($request->type === 'outgoing') {
-                OutgoingDocument::create([
-                    'document_id' => $request->document_id,
-                    'date_released' => $request->date_released,
-                    'forwarded_to_office_department_unit' => $request->forwarded_to_office_department_unit,
-                ]);
-            }
+            OutgoingDocument::create([
+                'document_id' => $request->document_id,
+                'date_released' => $request->date_released,
+                'forwarded_to_office_department_unit' => $request->forwarded_to_office_department_unit,
+            ]);
             return redirect()->back()->with('success', 'Document released successfully');
         } catch (\Exception $e) {
             Log::error('Document Release Error: ' . $e->getMessage());

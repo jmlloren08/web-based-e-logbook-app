@@ -210,7 +210,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                                         <TableCell className="hidden lg:table-cell">
                                             {doc.signature_path ? (
                                                 <img
-                                                    src={`/storage/${doc.signature_path}`}
+                                                    src={`/public/public/${doc.signature_path}`}
                                                     className="h-8 w-auto object-contain"
                                                     alt="Signature"
                                                 />

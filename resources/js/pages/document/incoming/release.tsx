@@ -13,7 +13,6 @@ export default function Release({ docId }: { docId: string }) {
 
     const [open, setOpen] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
-        type: 'outgoing',
         document_id: docId,
         date_released: new Date().toISOString().split('T')[0], // default today's date
         forwarded_to_office_department_unit: '',

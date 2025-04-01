@@ -41,6 +41,23 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
+export interface Archives {
+    id: number;
+    document_no: string;
+    origin_no: string;
+    date_time_received_incoming: string;
+    origin_office: string;
+    sender: string;
+    title_subject: string;
+    doc_type: string;
+    instruction_action_requested: string;
+    date_released: string;
+    forwarded_to_office_name: string;
+    received_by: string;
+    date_time_received_outgoing: string;
+    remarks: string;
+}
+
 export interface Documents {
     id: string;
     document_no: string;

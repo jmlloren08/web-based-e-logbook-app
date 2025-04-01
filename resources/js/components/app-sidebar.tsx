@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, FileInput, FileOutput, Warehouse } from 'lucide-react';
+import { LayoutGrid, FileInput, FileOutput, Warehouse, Archive } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavDocument } from './nav-document';
 import { NavOffice } from './nav-office';
@@ -26,6 +26,11 @@ const documentNavItems: NavItem[] = [
         title: 'Outgoing Documents',
         href: route('outgoing-documents.index'),
         icon: FileOutput,
+    },
+    {
+        title: 'Archive',
+        href: route('archives.index'),
+        icon: Archive,
     }
 ];
 

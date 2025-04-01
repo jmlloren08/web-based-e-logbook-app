@@ -28,17 +28,6 @@ export default function Edit({ document }: { document: IncomingDocument }) {
         instructions_action_requested: document.instructions_action_requested,
     });
 
-    useEffect(() => {
-        if (errors) {
-            toast.error("Please check the form for errors", {
-                action: {
-                    label: 'Dismiss',
-                    onClick: () => { }
-                }
-            });
-        }
-    }, [errors]);
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         put(route('incoming-documents.update', document.id), {

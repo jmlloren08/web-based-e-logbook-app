@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Document;
 
+use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\IncomingDocument;
 use App\Models\OutgoingDocument;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
