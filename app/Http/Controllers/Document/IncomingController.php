@@ -18,9 +18,7 @@ class IncomingController extends Controller
             $documents = Document::with(['incomingDocument'])
                 ->whereDoesntHave('outgoingDocument', function ($query) {
                     $query->whereNotNull('date_released');
-                })
-                ->latest()
-                ->paginate(10);
+                })->latest()->paginate(10);
             return Inertia::render('document/incoming/index', ['documents' => $documents]);
         } catch (\Exception $e) {
             Log::error('Document Index Error: ' . $e->getMessage());

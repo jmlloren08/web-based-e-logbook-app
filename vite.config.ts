@@ -20,6 +20,10 @@ export default defineConfig({
     resolve: {
         alias: {
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
+            '$': 'jquery',
         },
+    },
+    optimizeDeps: {
+        include: ['jquery', 'datatables.net-dt'],
     },
 });

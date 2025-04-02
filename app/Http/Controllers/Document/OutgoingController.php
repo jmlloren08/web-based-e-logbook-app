@@ -8,7 +8,6 @@ use App\Models\IncomingDocument;
 use App\Models\OutgoingDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class OutgoingController extends Controller
@@ -19,9 +18,7 @@ class OutgoingController extends Controller
 
             $documents = OutgoingDocument::with(['document'])
                 ->whereNotNull('date_released')
-                ->whereHas('document')
-                ->latest()
-                ->paginate(10);
+                ->whereHas('document')->latest()->paginate(10);
             return Inertia::render('document/outgoing/index', ['documents' => $documents]);
         } catch (\Exception $e) {
             Log::error('Document Index Error: ' . $e->getMessage());

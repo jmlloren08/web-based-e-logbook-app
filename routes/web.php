@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Archive\RfoController;
 use App\Http\Controllers\Document\ArchiveController;
 use App\Http\Controllers\Document\DashboardController;
 use App\Http\Controllers\Document\IncomingController;
@@ -29,7 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('auth/verified/outgoing-documents/{document}', [OutgoingController::class, 'destroy'])->name('outgoing-documents.destroy');
     Route::post('auth/verified/outgoing-documents/{id}/restore', [OutgoingController::class, 'restore'])->name('outgoing-documents.restore');
     Route::delete('auth/verified/outgoing-documents/{id}/force-delete', [OutgoingController::class, 'forceDelete'])->name('outgoing-documents.force-delete');
-    Route::resource('auth/verified/archives', ArchiveController::class);
+    // Archives / RFO
+    Route::resource('auth/verified/rfos', RfoController::class);
     // Admin-only routes
     Route::middleware(['admin'])->group(function () {
         // Route::resource('users', UserController::class);

@@ -41,7 +41,7 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
-export interface Archives {
+export interface RFOs {
     id: number;
     document_no: string;
     origin_no: string;
@@ -71,12 +71,14 @@ export interface IncomingDocument {
     document_no: string;
     title_subject: string;
     docs_types: string;
-    // Incoming Document
-    other_ref_no: string;
-    date_time_received: string;
-    from_office_department_unit: string;
-    sender_name: string;
-    instructions_action_requested: string;
+    incoming_document: {
+        id: string;
+        other_ref_no: string;
+        date_time_received: string;
+        from_office_department_unit: string;
+        sender_name: string;
+        instructions_action_requested: string;
+    };
 }
 
 export interface OutgoingDocument {

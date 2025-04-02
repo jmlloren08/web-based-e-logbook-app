@@ -95,7 +95,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
             <div className="container max-w-full mx-auto px-4 py-6 sm:px-6 lg:px-8">
                 <div className="bg-white shadow-md rounded-xl overflow-hidden">
                     <div className="p-4 border-b border-gray-200">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-4">
                             <Button variant="outline" asChild className="w-full sm:w-auto active:scale-95">
                                 <Link href={route('incoming-documents.index')} className="flex items-center justify-center">
                                     <ArrowLeftIcon className="h-4 w-4 mr-2" />
@@ -251,7 +251,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
 
                     <div className="p-4 border-t border-gray-200">
                         <Pagination>
-                            <PaginationContent className="flex justify-center items-center space-x-2">
+                            <PaginationContent>
                                 {documents.links.map((link, index) => (
                                     <PaginationItem key={index}>
                                         {link.url ? (
