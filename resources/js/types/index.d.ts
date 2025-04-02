@@ -41,7 +41,7 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
-export interface RFOs {
+export interface Archives {
     id: number;
     document_no: string;
     origin_no: string;

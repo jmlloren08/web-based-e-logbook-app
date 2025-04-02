@@ -1,21 +1,21 @@
 import { Head, usePage } from "@inertiajs/react";
-import { BreadcrumbItem, RFOs } from "@/types";
+import { Archives, BreadcrumbItem } from "@/types";
 import AppLayout from "@/layouts/app-layout";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import $ from 'jquery';
 import 'datatables.net-dt/js/dataTables.dataTables';
 import 'datatables.net-dt/css/dataTables.dataTables.css';
-import '../../../../../css/datatables.css';
+import '../../../../css/datatables.css';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
-    title: 'RFO',
-    href: route('rfos.index'),
+    title: 'RFO Archive',
+    href: route('document.archive.rfo.index'),
   },
 ];
 
-export default function Index({ rfos }: { rfos: RFOs[] }) {
+export default function Index({ documents }: { documents: Archives[] }) {
   const { flash } = usePage().props as { flash?: { success?: string } };
   const tableRef = useRef<HTMLTableElement>(null);
   const dataTableRef = useRef<any>(null);
@@ -61,7 +61,7 @@ export default function Index({ rfos }: { rfos: RFOs[] }) {
     // Initialize new table
     try {
       dataTableRef.current = $(tableRef.current).DataTable({
-        data: rfos,
+        data: documents,
         columns: [
           { data: 'document_no' },
           { data: 'title_subject' },
@@ -104,11 +104,11 @@ export default function Index({ rfos }: { rfos: RFOs[] }) {
     return () => {
       destroyDataTable();
     };
-  }, [rfos]);
+  }, [documents]);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="RFOs" />
+      <Head title="RFO Archive" />
       <div className="container max-w-full mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="bg-white shadow-md rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -125,15 +125,15 @@ export default function Index({ rfos }: { rfos: RFOs[] }) {
                 </tr>
               </thead>
               <tbody>
-                {rfos.map((rfo, index) => (
+                {documents.map((document, index) => (
                   <tr key={index}>
-                    <td className="text-sm">{rfo.document_no}</td>
-                    <td className="text-sm">{rfo.title_subject}</td>
-                    <td className="text-sm">{rfo.origin_office}</td>
-                    <td className="text-sm">{rfo.date_time_received_incoming}</td>
-                    <td className="text-sm">{rfo.doc_type}</td>
-                    <td className="text-sm">{rfo.sender}</td>
-                    <td className="text-sm">{rfo.remarks}</td>
+                    <td className="text-sm">{document.document_no}</td>
+                    <td className="text-sm">{document.title_subject}</td>
+                    <td className="text-sm">{document.origin_office}</td>
+                    <td className="text-sm">{document.date_time_received_incoming}</td>
+                    <td className="text-sm">{document.doc_type}</td>
+                    <td className="text-sm">{document.sender}</td>
+                    <td className="text-sm">{document.remarks}</td>
                   </tr>
                 ))}
               </tbody>

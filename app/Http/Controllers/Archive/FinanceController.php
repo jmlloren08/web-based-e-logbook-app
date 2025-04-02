@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Archive;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
-class FinanceController extends Controller
+class FinanceController extends BaseArchiveController
 {
-    //
+    protected function initializeOffice()
+    {
+        $this->officeName = 'FINANCE';
+    }
 }

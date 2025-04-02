@@ -3,10 +3,11 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, FileInput, FileOutput, Warehouse, Archive, ArchiveIcon } from 'lucide-react';
+import { LayoutGrid, FileInput, FileOutput, ArchiveIcon, Archive } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavDocument } from './nav-document';
 import { NavOffice } from './nav-office';
+import { ScrollArea } from './ui/scroll-area';
 
 const mainNavItems: NavItem[] = [
     {
@@ -32,33 +33,48 @@ const documentNavItems: NavItem[] = [
 const officeNavItems: NavItem[] = [
     {
         title: 'ODG',
-        href: '#',
-        icon: Warehouse,
+        href: route('document.archive.odg.index'),
+        icon: Archive,
+    },
+    {
+        title: 'ODDGO',
+        href: route('document.archive.oddgo.index'),
+        icon: Archive,
+    },
+    {
+        title: 'ODDGL',
+        href: route('document.archive.oddgl.index'),
+        icon: Archive,
+    },
+    {
+        title: 'ODDGAF',
+        href: route('document.archive.oddgaf.index'),
+        icon: Archive,
     },
     {
         title: 'BRO',
-        href: '#',
-        icon: Warehouse,
+        href: route('document.archive.bro.index'),
+        icon: ArchiveIcon,
     },
     {
         title: 'CMEO',
-        href: '#',
-        icon: Warehouse,
+        href: route('document.archive.cmeo.index'),
+        icon: ArchiveIcon,
     },
     {
         title: 'RFO',
-        href: route('rfos.index'),
+        href: route('document.archive.rfo.index'),
         icon: ArchiveIcon,
     },
     {
         title: 'Admin',
-        href: '#',
-        icon: Warehouse,
+        href: route('document.archive.admin.index'),
+        icon: ArchiveIcon,
     },
     {
         title: 'Finance',
-        href: '#',
-        icon: Warehouse,
+        href: route('document.archive.finance.index'),
+        icon: ArchiveIcon,
     },
 ];
 
@@ -76,13 +92,13 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-
             <SidebarContent>
-                <NavMain items={mainNavItems} />
-                <NavDocument items={documentNavItems} />
-                <NavOffice items={officeNavItems} />
+                <ScrollArea>
+                    <NavMain items={mainNavItems} />
+                    <NavDocument items={documentNavItems} />
+                    <NavOffice items={officeNavItems} />
+                </ScrollArea>
             </SidebarContent>
-
             <SidebarFooter>
                 <NavUser />
             </SidebarFooter>

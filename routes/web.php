@@ -1,5 +1,13 @@
 <?php
 
+use App\Http\Controllers\Archive\AdminController;
+use App\Http\Controllers\Archive\BroController;
+use App\Http\Controllers\Archive\CmeoController;
+use App\Http\Controllers\Archive\FinanceController;
+use App\Http\Controllers\Archive\OddgafController;
+use App\Http\Controllers\Archive\OddglController;
+use App\Http\Controllers\Archive\OddgoController;
+use App\Http\Controllers\Archive\OdgController;
 use App\Http\Controllers\Archive\RfoController;
 use App\Http\Controllers\Document\ArchiveController;
 use App\Http\Controllers\Document\DashboardController;
@@ -30,8 +38,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('auth/verified/outgoing-documents/{document}', [OutgoingController::class, 'destroy'])->name('outgoing-documents.destroy');
     Route::post('auth/verified/outgoing-documents/{id}/restore', [OutgoingController::class, 'restore'])->name('outgoing-documents.restore');
     Route::delete('auth/verified/outgoing-documents/{id}/force-delete', [OutgoingController::class, 'forceDelete'])->name('outgoing-documents.force-delete');
-    // Archives / RFO
-    Route::resource('auth/verified/rfos', RfoController::class);
+    // Archive Routes
+    Route::prefix('document/archive')->name('document.archive.')->group(function () {
+        Route::get('/odg', [OdgController::class, 'index'])->name('odg.index');
+        Route::get('/oddgo', [OddgoController::class, 'index'])->name('oddgo.index');
+        Route::get('/Oddgl', [OddglController::class, 'index'])->name('oddgl.index');
+        Route::get('/oddgaf', [OddgafController::class, 'index'])->name('oddgaf.index');
+        Route::get('/bro', [BroController::class, 'index'])->name('bro.index');
+        Route::get('/cmeo', [CmeoController::class, 'index'])->name('cmeo.index');
+        Route::get('/rfo', [RfoController::class, 'index'])->name('rfo.index');
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+        Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
+    });
     // Admin-only routes
     Route::middleware(['admin'])->group(function () {
         // Route::resource('users', UserController::class);

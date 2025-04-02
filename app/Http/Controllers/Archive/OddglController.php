@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Archive;
 
-class OdgController extends BaseArchiveController
+class OddglController extends BaseArchiveController
 {
     protected function initializeOffice()
     {
-        $this->officeName = 'ODG';
+        $this->officeName = 'ODDGL';
     }
 }
