@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useEffect } from "react";
-import { toast } from "sonner";
 import { ArrowLeftIcon } from "lucide-react";
+import Swal from "sweetalert2";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -18,7 +17,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Edit({ document }: { document: IncomingDocument }) {
     const { data, setData, put, processing, errors } = useForm({
-        document_no: document.document.document_no,
         title_subject: document.document.title_subject,
         docs_types: document.document.docs_types,
         other_ref_no: document.other_ref_no,
@@ -31,14 +29,14 @@ export default function Edit({ document }: { document: IncomingDocument }) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         put(route('incoming-documents.update', document.id), {
-            onSuccess: () => {
-                toast.success("Document updated successfully", {
-                    action: {
-                        label: 'Dismiss',
-                        onClick: () => { }
-                    }
+            preserveScroll: true,
+            onError: (errors) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errors.message
                 });
-            },
+            }
         });
     };
 
@@ -59,18 +57,15 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                     <div className="p-6">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Document No */}
+                                {/* Document No - Read Only */}
                                 <div className="space-y-2">
                                     <Label htmlFor="document_no">Document No.</Label>
                                     <Input
                                         id="document_no"
-                                        value={data.document_no}
-                                        onChange={e => setData('document_no', e.target.value)}
-                                        className={errors.document_no ? 'border-red-500' : ''}
+                                        value={document.document.document_no}
+                                        disabled
+                                        className="bg-gray-100"
                                     />
-                                    {errors.document_no && (
-                                        <p className="text-sm text-red-500">{errors.document_no}</p>
-                                    )}
                                 </div>
 
                                 {/* Title/Subject */}

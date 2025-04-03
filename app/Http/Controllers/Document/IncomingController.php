@@ -50,10 +50,9 @@ class IncomingController extends Controller
     {
         try {
             $request->validate([
-                'document_no' => 'required|unique:documents,document_no,' . $id,
                 'title_subject' => 'required|string',
                 'docs_types' => 'required|string',
-                'other_ref_no' => 'required',
+                'other_ref_no' => 'nullable|string',
                 'date_time_received' => 'required',
                 'from_office_department_unit' => 'required',
                 'sender_name' => 'required',
@@ -61,22 +60,29 @@ class IncomingController extends Controller
             ]);
 
             $incomingDocument = IncomingDocument::with('document')->findOrFail($id);
+
+            // Update the document
             $incomingDocument->document->update([
-                'document_no' => $request->document_no,
                 'title_subject' => $request->title_subject,
                 'docs_types' => $request->docs_types,
             ]);
+
+            // Update the incoming document
             $incomingDocument->update([
-                'other_ref_no' => $request->other_ref_no,
+                'other_ref_no' => $request->other_ref_no ?? null,
                 'date_time_received' => $request->date_time_received,
                 'from_office_department_unit' => $request->from_office_department_unit,
                 'sender_name' => $request->sender_name,
                 'instructions_action_requested' => $request->instructions_action_requested,
             ]);
-            return redirect()->route('incoming-documents.index')->with('success', 'Document updated successfully');
+
+            return redirect()->route('incoming-documents.index')
+                ->with('success', 'Document updated successfully');
         } catch (\Exception $e) {
             Log::error('Document Update Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Failed to update document: ' . $e->getMessage())
+                ->withInput();
         }
     }
     public function store(Request $request)

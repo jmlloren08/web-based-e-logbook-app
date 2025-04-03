@@ -10,6 +10,7 @@ import { BreadcrumbItem, IncomingDocument } from "@/types";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect } from "react";
+import Swal from "sweetalert2";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,12 +38,11 @@ export default function Create() {
 
     useEffect(() => {
         if (flash.error) {
-            toast.error(flash.error, {
-                action: {
-                    label: 'Dismiss',
-                    onClick: () => { }
-                }
-            })
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: flash.error
+            });
         }
     }, [flash]);
 

@@ -71,6 +71,7 @@ export interface IncomingDocument {
     document_no: string;
     title_subject: string;
     docs_types: string;
+    updated_at: string;
     incoming_document: {
         id: string;
         other_ref_no: string;

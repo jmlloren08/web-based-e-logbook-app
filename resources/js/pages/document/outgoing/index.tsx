@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Receive from "./receive";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowUpDown, ArrowLeftIcon, ViewIcon, EyeIcon } from "lucide-react";
+import { Search, ArrowUpDown, ArrowLeftIcon, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Swal from "sweetalert2";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,29 +19,44 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-type SortField = 'document_no' | 'date_released' | 'forwarded_to_office_department_unit' | 'received_by' | 'date_time_received' | 'remarks';
+type SortField = 'document_no' | 'date_released' | 'forwarded_to_office_department_unit' | 'received_by' | 'date_time_received' | 'remarks' | 'updated_at';
 type SortDirection = 'asc' | 'desc';
+
+const officeTabs = [
+    { value: 'all', label: 'All' },
+    { value: 'odg', label: 'ODG' },
+    { value: 'oddgo', label: 'ODDGO' },
+    { value: 'oddgaf', label: 'ODDGAF' },
+    { value: 'oddgl', label: 'ODDGL' },
+    { value: 'rfo', label: 'RFO' },
+    { value: 'cmeo', label: 'CMEO' },
+    { value: 'bro', label: 'BRO' },
+    { value: 'dbd', label: 'DBD' },
+    { value: 'rmtd', label: 'RMTD' },
+    { value: 'sulong', label: 'SULONG' },
+    { value: 'admin', label: 'ADMIN' },
+    { value: 'finance', label: 'FINANCE' },
+];
 
 export default function Index({ documents }: { documents: PaginatedResults<OutgoingDocument> }) {
     const { flash } = usePage().props;
     const [searchQuery, setSearchQuery] = useState('');
-    const [sortField, setSortField] = useState<SortField>('document_no');
-    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+    const [sortField, setSortField] = useState<SortField>('updated_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [activeTab, setActiveTab] = useState('all');
 
     useEffect(() => {
         if (flash.success) {
-            toast.success(flash.success, {
-                action: {
-                    label: 'Dismiss',
-                    onClick: () => { }
-                }
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: flash.success
             });
         } else if (flash.error) {
-            toast.error(flash.error, {
-                action: {
-                    label: 'Dismiss',
-                    onClick: () => { }
-                }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: flash.error
             });
         }
     }, [flash, documents]);
@@ -55,12 +72,15 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
 
     const filteredDocuments = documents.data.filter(doc => {
         const searchLower = searchQuery.toLowerCase();
-        return (
+        const matchesSearch = (
             doc.document.document_no.toLowerCase().includes(searchLower) ||
             doc.forwarded_to_office_department_unit.toLowerCase().includes(searchLower) ||
             (doc.received_by?.toLowerCase() || '').includes(searchLower) ||
             (doc.remarks?.toLowerCase() || '').includes(searchLower)
         );
+        const matchesTab = activeTab === 'all' ||
+            doc.document.document_no.toLowerCase().includes(activeTab.toLowerCase());
+        return matchesSearch && matchesTab;
     });
 
     const sortedDocuments = [...filteredDocuments].sort((a, b) => {
@@ -69,14 +89,16 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                 sortField === 'forwarded_to_office_department_unit' ? a.forwarded_to_office_department_unit :
                     sortField === 'received_by' ? (a.received_by || '') :
                         sortField === 'date_time_received' ? (a.date_time_received ? new Date(a.date_time_received).getTime() : 0) :
-                            (a.remarks || '');
+                            sortField === 'updated_at' ? new Date(a.updated_at).getTime() :
+                                (a.remarks || '');
 
         const bValue = sortField === 'document_no' ? b.document.document_no :
             sortField === 'date_released' ? new Date(b.date_released).getTime() :
                 sortField === 'forwarded_to_office_department_unit' ? b.forwarded_to_office_department_unit :
                     sortField === 'received_by' ? (b.received_by || '') :
                         sortField === 'date_time_received' ? (b.date_time_received ? new Date(b.date_time_received).getTime() : 0) :
-                            (b.remarks || '');
+                            sortField === 'updated_at' ? new Date(b.updated_at).getTime() :
+                                (b.remarks || '');
 
         if (typeof aValue === 'string') {
             return sortDirection === 'asc'
@@ -113,6 +135,22 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                             </div>
                         </div>
                     </div>
+
+                    <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+                        <div className="border-b border-gray-200">
+                            <TabsList className="w-full justify-start overflow-x-auto">
+                                {officeTabs.map((tab) => (
+                                    <TabsTrigger
+                                        key={tab.value}
+                                        value={tab.value}
+                                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                    >
+                                        {tab.label}
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </div>
+                    </Tabs>
 
                     <div className="overflow-x-auto">
                         <Table className="w-full">

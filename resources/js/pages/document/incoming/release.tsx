@@ -44,9 +44,9 @@ export default function Release({ docId }: { docId: string }) {
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
                 <Button
-                    variant="ghost"
-                    size="icon"
-                    className='hover:text-blue-600 active:scale-95'
+                    variant="default"
+                    size="sm"
+                    className='hover:bg-blue-600 active:scale-95'
                     title='Release Document'
                 >
                     <FileInput />
@@ -123,7 +123,7 @@ export default function Release({ docId }: { docId: string }) {
                             "w-full md:w-auto",
                             processing
                                 ? "opacity-50 cursor-not-allowed"
-                                : "bg-blue-600 hover:bg-blue-600/90"
+                                : "hover:bg-blue-600 active:scale-95"
                         )}
                     >
                         {processing ? (

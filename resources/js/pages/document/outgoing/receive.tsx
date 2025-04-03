@@ -9,19 +9,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { FileOutput } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Swal from 'sweetalert2';
 
 export default function Receive({ docId, documentNo, docTitleSubject }: { docId: string; documentNo: string; docTitleSubject: string }) {
 
     const [open, setOpen] = useState(false);
     const signaturePadRef = useRef<SignatureCanvas | null>(null);
-
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    // 
     const { data, setData, processing, errors } = useForm({
         received_by: '',
-        date_time_received: new Date().toISOString().slice(0, 16),
+        date_time_received: '',
         remarks: '',
         signature_path: '',
     });
-
     // Ensure canvas clears when dialog opens
     useEffect(() => {
         if (open && signaturePadRef.current) {
@@ -36,8 +37,34 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
         }
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
+        // Reset validation errors
+        setValidationErrors({});
+        // Validate required fields
+        const newErrors: Record<string, string> = {};
+        if (!data.received_by) {
+            newErrors.received_by = 'Received By is required';
+        }
+        if (signaturePadRef.current?.isEmpty()) {
+            newErrors.signature = 'Signature is required';
+        }
+        // If there are validation errors, display them and return
+        if (Object.keys(newErrors).length > 0) {
+            setValidationErrors(newErrors);
+            return;
+        }
+        // Show loading state
+        Swal.fire({
+            title: 'Processing...',
+            html: 'Please wait while we process your request',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        // Add form fields to FormData
         const formData = new FormData();
         formData.append('_method', 'PATCH');
         Object.entries(data).forEach(([key, value]) => {
@@ -59,7 +86,18 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
             const signatureFile = new File([file], 'signature.png', { type: 'image/png' });
             formData.append('signature_path', signatureFile);
         }
-        router.post(route('outgoing-documents.update', { id: docId }), formData);
+        await router.post(route('outgoing-documents.update', { id: docId }), formData, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                Swal.close();
+                setOpen(false);
+            },
+            onError: () => {
+                Swal.close();
+                console.log('Form submission errors: ', errors);
+            }
+        });
     }
 
     const clearSignature = () => {
@@ -87,7 +125,7 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                         {docTitleSubject}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-6">
                     <div className="grid grid-cols-1 gap-4">
                         {/* Receiver Details */}
                         <div className="bg-gray-50 p-4 rounded-lg">
@@ -106,7 +144,7 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                                         placeholder="Enter name"
                                         required
                                     />
-                                    <InputError message={errors.received_by} />
+                                    <InputError message={validationErrors.received_by || errors.received_by} />
                                 </div>
                                 <div>
                                     <Label htmlFor="date_time_received" className="mb-2">
@@ -154,7 +192,7 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                                     ref={signaturePadRef}
                                     canvasProps={{ className: 'w-full h-40 touch-none' }}
                                 />
-                                <InputError message={errors.signature_path} />
+                                <InputError message={validationErrors.signature || errors.signature_path} />
                             </div>
                             <p className="text-xs text-muted-foreground mt-2">
                                 Draw your signature in the box above
@@ -169,13 +207,20 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                             variant="outline"
                             onClick={() => setOpen(false)}
                             className="w-full md:w-auto active:scale-95"
+                            disabled={processing}
                         >
                             Cancel
                         </Button>
                         <Button
-                            type="submit"
+                            onClick={handleSubmit}
                             disabled={processing}
-                            className={cn("w-full md:w-auto", processing ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600")}>
+                            className={cn(
+                                "w-full md:w-auto",
+                                processing
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "hover:bg-blue-600"
+                            )}
+                        >
                             {processing ? (
                                 <span className="flex items-center justify-center">
                                     <svg
@@ -205,7 +250,7 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                             )}
                         </Button>
                     </AlertDialogFooter>
-                </form>
+                </div>
             </AlertDialogContent>
         </AlertDialog>
     );

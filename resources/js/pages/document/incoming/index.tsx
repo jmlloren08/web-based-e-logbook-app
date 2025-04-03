@@ -3,12 +3,14 @@ import { BreadcrumbItem, IncomingDocument, PaginatedResults } from "@/types";
 import AppLayout from "@/layouts/app-layout";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Release from "./release";
 import { Input } from "@/components/ui/input";
 import { Search, ArrowUpDown, EditIcon } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Swal from "sweetalert2";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,22 +19,38 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-type SortField = 'document_no' | 'other_ref_no' | 'date_time_received' | 'from_office_department_unit' | 'sender_name' | 'title_subject' | 'docs_types';
+type SortField = 'document_no' | 'other_ref_no' | 'date_time_received' | 'from_office_department_unit' | 'sender_name' | 'title_subject' | 'docs_types' | 'updated_at';
 type SortDirection = 'asc' | 'desc';
+
+const officeTabs = [
+    { value: 'all', label: 'All' },
+    { value: 'odg', label: 'ODG' },
+    { value: 'oddgo', label: 'ODDGO' },
+    { value: 'oddgaf', label: 'ODDGAF' },
+    { value: 'oddgl', label: 'ODDGL' },
+    { value: 'rfo', label: 'RFO' },
+    { value: 'cmeo', label: 'CMEO' },
+    { value: 'bro', label: 'BRO' },
+    { value: 'dbd', label: 'DBD' },
+    { value: 'rmtd', label: 'RMTD' },
+    { value: 'sulong', label: 'SULONG' },
+    { value: 'admin', label: 'ADMIN' },
+    { value: 'finance', label: 'FINANCE' },
+];
 
 export default function Index({ documents }: { documents: PaginatedResults<IncomingDocument> }) {
     const { flash } = usePage().props as { flash?: { success?: string } };
     const [searchQuery, setSearchQuery] = useState('');
-    const [sortField, setSortField] = useState<SortField>('document_no');
-    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+    const [sortField, setSortField] = useState<SortField>('updated_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [activeTab, setActiveTab] = useState('all');
 
     useEffect(() => {
         if (flash?.success) {
-            toast.success(flash.success, {
-                action: {
-                    label: 'Dismiss',
-                    onClick: () => { }
-                }
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: flash.success
             });
         }
     }, [flash]);
@@ -48,7 +66,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
 
     const filteredDocuments = documents.data.filter(doc => {
         const searchLower = searchQuery.toLowerCase();
-        return (
+        const matchesSearch = (
             doc.document_no.toLowerCase().includes(searchLower) ||
             doc.incoming_document.other_ref_no.toLowerCase().includes(searchLower) ||
             doc.incoming_document.from_office_department_unit.toLowerCase().includes(searchLower) ||
@@ -56,6 +74,9 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
             doc.title_subject.toLowerCase().includes(searchLower) ||
             doc.docs_types.toLowerCase().includes(searchLower)
         );
+        const matchesTab = activeTab === 'all' ||
+            doc.document_no.toLowerCase().includes(activeTab.toLowerCase());
+        return matchesSearch && matchesTab;
     });
 
     const sortedDocuments = [...filteredDocuments].sort((a, b) => {
@@ -65,7 +86,8 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                     sortField === 'from_office_department_unit' ? a.incoming_document.from_office_department_unit :
                         sortField === 'sender_name' ? a.incoming_document.sender_name :
                             sortField === 'title_subject' ? a.title_subject :
-                                a.docs_types;
+                                sortField === 'updated_at' ? new Date(a.updated_at).getTime() :
+                                    a.docs_types;
 
         const bValue = sortField === 'document_no' ? b.document_no :
             sortField === 'other_ref_no' ? b.incoming_document.other_ref_no :
@@ -73,7 +95,8 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                     sortField === 'from_office_department_unit' ? b.incoming_document.from_office_department_unit :
                         sortField === 'sender_name' ? b.incoming_document.sender_name :
                             sortField === 'title_subject' ? b.title_subject :
-                                b.docs_types;
+                                sortField === 'updated_at' ? new Date(b.updated_at).getTime() :
+                                    b.docs_types;
 
         if (typeof aValue === 'string') {
             return sortDirection === 'asc'
@@ -108,10 +131,27 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                         </div>
                     </div>
 
+                    <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+                        <div className="border-b border-gray-200">
+                            <TabsList className="w-full justify-start overflow-x-auto">
+                                {officeTabs.map((tab) => (
+                                    <TabsTrigger
+                                        key={tab.value}
+                                        value={tab.value}
+                                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                    >
+                                        {tab.label}
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </div>
+                    </Tabs>
+
                     <div className="overflow-x-auto">
                         <Table className="w-full">
                             <TableHeader>
                                 <TableRow>
+                                    <TableCell></TableCell>
                                     <TableHead className="hidden md:table-cell cursor-pointer" onClick={() => handleSort('document_no')}>
                                         <div className="flex items-center gap-1">
                                             Document No.
@@ -176,12 +216,26 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                                         </div>
                                     </TableHead>
                                     <TableHead className="hidden lg:table-cell">Instructions</TableHead>
-                                    <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {sortedDocuments.map((doc: IncomingDocument) => (
                                     <TableRow key={doc.id} className="hover:bg-gray-50">
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Link href={route('incoming-documents.edit', doc.incoming_document.id)}>
+                                                    <Button
+                                                        variant="default"
+                                                        size="sm"
+                                                        className='hover:bg-blue-600 active:scale-95'
+                                                        title='Edit Document'
+                                                    >
+                                                        <EditIcon />
+                                                    </Button>
+                                                </Link>
+                                                <Release docId={doc.id} />
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="hidden md:table-cell">{doc.document_no}</TableCell>
                                         <TableCell className="hidden md:table-cell">{doc.incoming_document.other_ref_no}</TableCell>
                                         <TableCell className="hidden lg:table-cell">
@@ -209,21 +263,6 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                                         <TableCell className="hidden sm:table-cell">{doc.docs_types}</TableCell>
                                         <TableCell className="hidden lg:table-cell">
                                             {doc.incoming_document.instructions_action_requested}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex">
-                                                <Link href={route('incoming-documents.edit', doc.incoming_document.id)}>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className='hover:text-blue-600 active:scale-95'
-                                                        title='Edit Document'
-                                                    >
-                                                        <EditIcon />
-                                                    </Button>
-                                                </Link>
-                                                <Release docId={doc.id} />
-                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}
