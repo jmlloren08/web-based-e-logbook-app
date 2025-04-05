@@ -21,6 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Create() {
 
+    const { flash } = usePage().props as { flash?: { error?: string } };
     const { data, setData, post, processing, errors } = useForm<IncomingDocument>({
         type: 'incoming',
         document_no: '',
@@ -34,10 +35,8 @@ export default function Create() {
         instructions_action_requested: '',
     });
 
-    const { flash } = usePage().props;
-
     useEffect(() => {
-        if (flash.error) {
+        if (flash?.error) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -48,6 +47,17 @@ export default function Create() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        // Show loading state
+        Swal.fire({
+            title: 'Processing...',
+            html: 'Please wait while we process your request',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
         // Add form fields to FormData
         const formData = new FormData();
         (Object.keys(data) as Array<keyof IncomingDocument>).forEach((key) => {

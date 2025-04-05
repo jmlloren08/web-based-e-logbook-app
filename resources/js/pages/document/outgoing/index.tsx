@@ -4,7 +4,6 @@ import AppLayout from "@/layouts/app-layout";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import Receive from "./receive";
 import { Input } from "@/components/ui/input";
 import { Search, ArrowUpDown, ArrowLeftIcon, EyeIcon } from "lucide-react";
@@ -39,27 +38,28 @@ const officeTabs = [
 ];
 
 export default function Index({ documents }: { documents: PaginatedResults<OutgoingDocument> }) {
-    const { flash } = usePage().props;
+
+    const { flash } = usePage().props as { flash?: { success?: string; error?: string } };
     const [searchQuery, setSearchQuery] = useState('');
     const [sortField, setSortField] = useState<SortField>('updated_at');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [activeTab, setActiveTab] = useState('all');
 
     useEffect(() => {
-        if (flash.success) {
+        if (flash?.success) {
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
                 text: flash.success
             });
-        } else if (flash.error) {
+        } else if (flash?.error) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: flash.error
             });
         }
-    }, [flash, documents]);
+    }, [flash]);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -73,13 +73,13 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
     const filteredDocuments = documents.data.filter(doc => {
         const searchLower = searchQuery.toLowerCase();
         const matchesSearch = (
-            doc.document.document_no.toLowerCase().includes(searchLower) ||
-            doc.forwarded_to_office_department_unit.toLowerCase().includes(searchLower) ||
-            (doc.received_by?.toLowerCase() || '').includes(searchLower) ||
-            (doc.remarks?.toLowerCase() || '').includes(searchLower)
+            doc.document_no.toLowerCase().includes(searchLower) ||
+            doc.outgoing_document.forwarded_to_office_department_unit.toLowerCase().includes(searchLower) ||
+            (doc.outgoing_document.received_by?.toLowerCase() || '').includes(searchLower) ||
+            (doc.outgoing_document.remarks?.toLowerCase() || '').includes(searchLower)
         );
         const matchesTab = activeTab === 'all' ||
-            doc.document.document_no.toLowerCase().includes(activeTab.toLowerCase());
+            doc.document_no.toLowerCase().includes(activeTab.toLowerCase());
         return matchesSearch && matchesTab;
     });
 
@@ -156,6 +156,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                         <Table className="w-full">
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead></TableHead>
                                     <TableHead className="hidden sm:table-cell cursor-pointer" onClick={() => handleSort('document_no')}>
                                         <div className="flex items-center gap-1">
                                             Document No.
@@ -211,25 +212,46 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                                         </div>
                                     </TableHead>
                                     <TableHead className="hidden lg:table-cell">Signature</TableHead>
-                                    <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {sortedDocuments.map((doc) => (
                                     <TableRow key={doc.id} className="hover:bg-gray-50">
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                {!doc.outgoing_document.received_by ? (
+                                                    <Receive
+                                                        docId={doc.id}
+                                                        documentNo={doc.document_no}
+                                                        docTitleSubject={doc.title_subject}
+                                                    />
+                                                ) : (
+                                                    <Link href={route('outgoing-documents.show', { id: doc.id })}>
+                                                        <Button
+                                                            variant="default"
+                                                            size="sm"
+                                                            className='hover:bg-blue-600 active:scale-95'
+                                                            title='View Document'
+                                                        >
+                                                            <EyeIcon />
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="hidden sm:table-cell">
-                                            {doc.document.document_no}
+                                            {doc.document_no}
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell">
-                                            {new Date(doc.date_released).toLocaleDateString()}
+                                            {new Date(doc.outgoing_document.date_released).toLocaleDateString()}
                                         </TableCell>
                                         <TableCell className="hidden lg:table-cell">
-                                            {doc.forwarded_to_office_department_unit}
+                                            {doc.outgoing_document.forwarded_to_office_department_unit}
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-medium">{doc.received_by || 'Not Yet Received'}</div>
+                                            <div className="font-medium">{doc.outgoing_document.received_by || 'Not Yet Received'}</div>
                                             <div className="text-sm text-gray-500 md:hidden">
-                                                {new Date(doc.date_released).toLocaleDateString()} | {doc.remarks}
+                                                {new Date(doc.outgoing_document.date_released).toLocaleDateString()} | {doc.outgoing_document.remarks}
                                             </div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">
@@ -241,38 +263,20 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                                                     hour: '2-digit',
                                                     minute: '2-digit',
                                                     hour12: true,
-                                                }).format(new Date(doc.date_time_received))
+                                                }).format(new Date(doc.outgoing_document.date_time_received))
                                                 : 'Pending'}
                                         </TableCell>
-                                        <TableCell className="hidden md:table-cell">{doc.remarks}</TableCell>
+                                        <TableCell className="hidden md:table-cell">{doc.outgoing_document.remarks}</TableCell>
                                         <TableCell className="hidden lg:table-cell">
-                                            {doc.signature_path ? (
+                                            {doc.outgoing_document.signature_path ? (
                                                 <img
-                                                    src={`/public/public/${doc.signature_path}`}
+                                                    src={`/public/public/${doc.outgoing_document.signature_path}`}
                                                     className="h-8 w-auto object-contain"
                                                     alt="Signature"
                                                 />
                                             ) : (
                                                 <span className="text-gray-400">No Signature Yet</span>
                                             )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center justify-center">
-                                                {!doc.received_by ? (
-                                                    <Receive
-                                                        docId={doc.id}
-                                                        documentNo={doc.document.document_no}
-                                                        docTitleSubject={doc.document.title_subject}
-                                                    />
-                                                ) : (
-                                                    <Link
-                                                        href={route('outgoing-documents.show', { id: doc.id })}
-                                                        className="hover:text-blue-500 active:scale-95"
-                                                    >
-                                                        <EyeIcon />
-                                                    </Link>
-                                                )}
-                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

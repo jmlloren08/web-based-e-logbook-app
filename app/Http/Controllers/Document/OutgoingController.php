@@ -15,10 +15,11 @@ class OutgoingController extends Controller
     public function index()
     {
         try {
-
-            $documents = OutgoingDocument::with(['document'])
-                ->whereNotNull('date_released')
-                ->whereHas('document')->latest()->paginate(10);
+            $documents = Document::with(['currentState', 'outgoingDocument'])
+                ->whereIn('current_state_id', [2, 3, 6]) // sent, received, finalized
+                // ->where('is_final', false)
+                ->latest()
+                ->paginate(10);
             return Inertia::render('document/outgoing/index', ['documents' => $documents]);
         } catch (\Exception $e) {
             Log::error('Document Index Error: ' . $e->getMessage());
@@ -54,8 +55,8 @@ class OutgoingController extends Controller
                 'remarks' => 'nullable|string',
                 'signature_path' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
-            $outgoingDocument = OutgoingDocument::findOrFail($id);
-            if (!$outgoingDocument) {
+            $document = Document::with('outgoingDocument')->findOrFail($id);
+            if (!$document) {
                 return redirect()->back()->with('error', 'Document not found');
             }
             // Handle signature upload if provided
@@ -64,43 +65,61 @@ class OutgoingController extends Controller
                 $validatedData['signature_path'] = $signaturePath;
             }
             // Update outgoing document
-            $outgoingDocument->update($validatedData);
-            return redirect()->route('outgoing-documents.index')->with('success', 'Document received successfully');
+            $document->outgoingDocument->update($validatedData);
+            // Update document state
+            $document->current_state_id = 3; // received
+            $document->save();
+            // Add history event
+            $document->addHistoryEvent(3, 'Document has been received by recipient.', [
+                'received_by' => $validatedData['received_by'],
+                'date_time_received' => $validatedData['date_time_received'],
+                'remarks' => $validatedData['remarks'] ?? null,
+                'signature_path' => $validatedData['signature_path'],
+            ]);
+            return redirect()->route('outgoing-documents.index')->with('success', 'Received document successfully');
         } catch (\Exception $e) {
             Log::error('Document Log Store Error: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
     public function show($id)
     {
         try {
-            // Log::info('Fetching outgoing document by ID:', ['id' => $id]);
-            // Get the outgoing document with related document
-            $outgoingDocument = OutgoingDocument::with('document')->findOrFail($id);
-            // Get the document
-            $document = $outgoingDocument->document;
-            // Get the incoming document where document_id matches the current document's id
-            $incomingDocument = IncomingDocument::where('document_id', $document->id)->first();
-            Log::info('Documents:', [
-                'documents' => [
-                    'document' => $document,
-                    'incomingDocument' => $incomingDocument,
-                    'outgoingDocument' => $outgoingDocument,
-                ],
-            ]);
-            // Pass the data to the view
+            $document = Document::with(['currentState', 'history.state', 'history.user'])->findOrFail($id);
+            // Get the latest outgoing document
+            $outgoingDocument = OutgoingDocument::where('document_id', $document->$id)
+                ->latest()
+                ->first();
+            // Get the original incoming document
+            $incomingDocument = IncomingDocument::where('document_id', $document->$id)->first();
+            // Format history events for the timeline
+            $historyEvents = $document->history->map(function ($event) {
+                $user = $event->user;
+                return [
+                    'id' => $event->id,
+                    'state' => $event->state->name,
+                    'user' => $user ? [
+                        'name' => $user->name,
+                        'role' => $user->role ?? null,
+                    ] : null,
+                    'timestamp' => $event->timestamp,
+                    'comments' => $event->comments,
+                    'metadata' => $event->metadata,
+                    'revision_number' => $event->revision_number,
+                    'is_current' => $event->is_current,
+                ];
+            });
             return Inertia::render('document/outgoing/show', [
                 'document' => $document,
                 'incomingDocument' => $incomingDocument,
                 'outgoingDocument' => $outgoingDocument,
+                'historyEvents' => $historyEvents,
             ]);
         } catch (\Exception $e) {
             Log::error('Document Show Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Document not found.');
         }
     }
-
     public function destroy(Document $document)
     {
         try {

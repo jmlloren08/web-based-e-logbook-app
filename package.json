@@ -54,6 +54,7 @@
         "clsx": "^2.1.1",
         "datatables.net": "^2.2.2",
         "datatables.net-dt": "^2.2.2",
+        "date-fns": "^4.1.0",
         "globals": "^15.14.0",
         "jquery": "^3.7.1",
         "laravel-vite-plugin": "^1.0",

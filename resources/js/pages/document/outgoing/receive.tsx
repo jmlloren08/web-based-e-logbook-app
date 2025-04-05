@@ -48,6 +48,9 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
         if (signaturePadRef.current?.isEmpty()) {
             newErrors.signature = 'Signature is required';
         }
+        if (!data.date_time_received) {
+            newErrors.date_time_received = 'Date Time Received is required';
+        }
         // If there are validation errors, display them and return
         if (Object.keys(newErrors).length > 0) {
             setValidationErrors(newErrors);
@@ -111,11 +114,11 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
             <AlertDialogTrigger asChild>
                 <Button
                     variant="default"
-                    size="default"
-                    className='active:scale-95'
+                    size="sm"
+                    className='hover:bg-blue-600 active:scale-95'
                     title='Receive Document'
                 >
-                    <FileOutput />Receive
+                    <FileOutput />
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className='sm:max-w-[600px] max-h-[90vh] overflow-y-auto'>
@@ -157,7 +160,7 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                                         onChange={(e) => setData('date_time_received', e.target.value)}
                                         required
                                     />
-                                    <InputError message={errors.date_time_received} />
+                                    <InputError message={validationErrors.date_time_received || errors.date_time_received} />
                                 </div>
                             </div>
                         </div>

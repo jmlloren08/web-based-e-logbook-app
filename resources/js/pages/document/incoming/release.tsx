@@ -44,9 +44,9 @@ export default function Release({ docId }: { docId: string }) {
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
                 <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    className='hover:bg-blue-600 active:scale-95'
+                    className='active:scale-95'
                     title='Release Document'
                 >
                     <FileInput />

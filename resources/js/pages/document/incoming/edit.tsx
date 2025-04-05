@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeftIcon } from "lucide-react";
+import InputError from "@/components/input-error";
 import Swal from "sweetalert2";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -16,28 +17,38 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Edit({ document }: { document: IncomingDocument }) {
-    const { data, setData, put, processing, errors } = useForm({
-        title_subject: document.document.title_subject,
-        docs_types: document.document.docs_types,
-        other_ref_no: document.other_ref_no,
-        date_time_received: document.date_time_received,
-        from_office_department_unit: document.from_office_department_unit,
-        sender_name: document.sender_name,
-        instructions_action_requested: document.instructions_action_requested,
+
+    const { data, setData, put, post, processing, errors } = useForm({
+        title_subject: document.title_subject,
+        docs_types: document.docs_types,
+        other_ref_no: document.incoming_document.other_ref_no,
+        date_time_received: document.incoming_document.date_time_received,
+        from_office_department_unit: document.incoming_document.from_office_department_unit,
+        sender_name: document.incoming_document.sender_name,
+        instructions_action_requested: document.incoming_document.instructions_action_requested,
+        revision_comments: '',
+        date_released: '',
+        forwarded_to_office_department_unit: ''
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('incoming-documents.update', document.id), {
-            preserveScroll: true,
-            onError: (errors) => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errors.message
-                });
+        // Show loading state
+        Swal.fire({
+            title: 'Processing...',
+            html: 'Please wait while we process your request',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
             }
         });
+        if (document.current_state_id === 4) {
+            post(route('document.submit-revision', document.id), { preserveScroll: true });
+        } else {
+            put(route('incoming-documents.update', document.id), { preserveScroll: true });
+        }
     };
 
     return (
@@ -56,32 +67,46 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                 <div className="bg-white shadow-md rounded-xl overflow-hidden">
                     <div className="p-6">
                         <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* Revision */}
+                            {document.current_state_id === 4 && (
+                                <>
+                                    <h3 className="text-lg font-medium mt-6 mb-3">Revision Details</h3>
+                                    <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200 mb-4">
+                                        <p className="text-sm text-yellow-800">
+                                            This document has been returned for revision. Please make the necessary changes and resubmit.
+                                        </p>
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <Label>Revision Comments *</Label>
+                                        <Textarea value={data.revision_comments} onChange={e => setData('revision_comments', e.target.value)} required />
+                                    </div>
+
+                                    <h3 className="text-lg font-medium mt-6 mb-3">Release Information</h3>
+                                    <div className="mb-4">
+                                        <Label>Date Released *</Label>
+                                        <Input type="datetime-local" value={data.date_released} onChange={e => setData('date_released', e.target.value)} required />
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <Label>Forward To *</Label>
+                                        <Input value={data.forwarded_to_office_department_unit} onChange={e => setData('forwarded_to_office_department_unit', e.target.value)} required />
+                                    </div>
+                                </>
+                            )}
+                            {/* Document Information */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Document No - Read Only */}
                                 <div className="space-y-2">
                                     <Label htmlFor="document_no">Document No.</Label>
-                                    <Input
-                                        id="document_no"
-                                        value={document.document.document_no}
-                                        disabled
-                                        className="bg-gray-100"
-                                    />
+                                    <Input id="document_no" value={document.document_no} readOnly className="bg-gray-100" />
                                 </div>
-
                                 {/* Title/Subject */}
                                 <div className="space-y-2">
                                     <Label htmlFor="title_subject">Title/Subject</Label>
-                                    <Input
-                                        id="title_subject"
-                                        value={data.title_subject}
-                                        onChange={e => setData('title_subject', e.target.value)}
-                                        className={errors.title_subject ? 'border-red-500' : ''}
-                                    />
-                                    {errors.title_subject && (
-                                        <p className="text-sm text-red-500">{errors.title_subject}</p>
-                                    )}
+                                    <Input id="title_subject" value={data.title_subject} onChange={e => setData('title_subject', e.target.value)} className={errors.title_subject ? 'border-red-500' : ''} />
+                                    <InputError message={errors.title_subject} className="mt-1" />
                                 </div>
-
                                 {/* Document Types */}
                                 <div className="space-y-2">
                                     <Label htmlFor="docs_types">Document Types</Label>
@@ -91,11 +116,8 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                         onChange={e => setData('docs_types', e.target.value)}
                                         className={errors.docs_types ? 'border-red-500' : ''}
                                     />
-                                    {errors.docs_types && (
-                                        <p className="text-sm text-red-500">{errors.docs_types}</p>
-                                    )}
+                                    <InputError message={errors.docs_types} className="mt-1" />
                                 </div>
-
                                 {/* Other Ref No */}
                                 <div className="space-y-2">
                                     <Label htmlFor="other_ref_no">Other Ref No</Label>
@@ -105,11 +127,8 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                         onChange={e => setData('other_ref_no', e.target.value)}
                                         className={errors.other_ref_no ? 'border-red-500' : ''}
                                     />
-                                    {errors.other_ref_no && (
-                                        <p className="text-sm text-red-500">{errors.other_ref_no}</p>
-                                    )}
+                                    <InputError message={errors.other_ref_no} className="mt-1" />
                                 </div>
-
                                 {/* Date/Time Received */}
                                 <div className="space-y-2">
                                     <Label htmlFor="date_time_received">Date/Time Received</Label>
@@ -120,11 +139,8 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                         onChange={e => setData('date_time_received', e.target.value)}
                                         className={errors.date_time_received ? 'border-red-500' : ''}
                                     />
-                                    {errors.date_time_received && (
-                                        <p className="text-sm text-red-500">{errors.date_time_received}</p>
-                                    )}
+                                    <InputError message={errors.date_time_received} className="mt-1" />
                                 </div>
-
                                 {/* From Office/Department */}
                                 <div className="space-y-2">
                                     <Label htmlFor="from_office_department_unit">From Office/Department</Label>
@@ -134,11 +150,8 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                         onChange={e => setData('from_office_department_unit', e.target.value)}
                                         className={errors.from_office_department_unit ? 'border-red-500' : ''}
                                     />
-                                    {errors.from_office_department_unit && (
-                                        <p className="text-sm text-red-500">{errors.from_office_department_unit}</p>
-                                    )}
+                                    <InputError message={errors.from_office_department_unit} className="mt-1" />
                                 </div>
-
                                 {/* Sender Name */}
                                 <div className="space-y-2">
                                     <Label htmlFor="sender_name">Sender Name</Label>
@@ -148,41 +161,24 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                         onChange={e => setData('sender_name', e.target.value)}
                                         className={errors.sender_name ? 'border-red-500' : ''}
                                     />
-                                    {errors.sender_name && (
-                                        <p className="text-sm text-red-500">{errors.sender_name}</p>
-                                    )}
+                                    <InputError message={errors.sender_name} className="mt-1" />
                                 </div>
-                            </div>
-
-                            {/* Instructions/Action Requested */}
-                            <div className="space-y-2">
-                                <Label htmlFor="instructions_action_requested">Instructions/Action Requested</Label>
-                                <Textarea
-                                    id="instructions_action_requested"
-                                    value={data.instructions_action_requested}
-                                    onChange={e => setData('instructions_action_requested', e.target.value)}
-                                    className={errors.instructions_action_requested ? 'border-red-500' : ''}
-                                    rows={4}
-                                />
-                                {errors.instructions_action_requested && (
-                                    <p className="text-sm text-red-500">{errors.instructions_action_requested}</p>
-                                )}
-                            </div>
-
-                            <div className="flex justify-end space-x-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => window.history.back()}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={processing}
-                                >
-                                    {processing ? 'Updating...' : 'Update Document'}
-                                </Button>
+                                {/* Instructions/Action Requested */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="instructions_action_requested">Instructions/Action Requested</Label>
+                                    <Textarea
+                                        id="instructions_action_requested"
+                                        value={data.instructions_action_requested}
+                                        onChange={e => setData('instructions_action_requested', e.target.value)}
+                                        className={errors.instructions_action_requested ? 'border-red-500' : ''}
+                                        rows={4}
+                                    />
+                                    <InputError message={errors.instructions_action_requested} className="mt-1" />
+                                </div>
+                                <div className="flex justify-end space-x-4">
+                                    <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancel</Button>
+                                    <Button type="submit" disabled={processing}>{processing ? 'Updating...' : 'Submit'}</Button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -190,4 +186,4 @@ export default function Edit({ document }: { document: IncomingDocument }) {
             </div>
         </AppLayout>
     );
-} 
+}

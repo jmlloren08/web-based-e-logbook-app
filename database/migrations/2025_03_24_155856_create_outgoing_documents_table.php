@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignUuid('document_id')->constrained('documents')->onDelete('cascade');
             $table->timestamp('date_released');
             $table->string('forwarded_to_office_department_unit');
-            $table->string('received_by');
-            $table->string('date_time_received');
+            $table->string('received_by')->nullable();
+            $table->string('date_time_received')->nullable();
             $table->text('remarks')->nullable();
             $table->text('signature_path')->nullable();
             $table->timestamps();

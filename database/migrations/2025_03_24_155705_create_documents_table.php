@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('document_no')->unique();
             $table->string('title_subject');
             $table->string('docs_types');
+            $table->foreignId('current_state_id')->constrained('document_states')->onDelete('cascade');
+            $table->integer('revision_number')->default(0);
+            $table->boolean('is_final')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

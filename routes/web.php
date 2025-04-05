@@ -11,6 +11,7 @@ use App\Http\Controllers\Archive\OdgController;
 use App\Http\Controllers\Archive\RfoController;
 use App\Http\Controllers\Document\ArchiveController;
 use App\Http\Controllers\Document\DashboardController;
+use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\IncomingController;
 use App\Http\Controllers\Document\OutgoingController;
 use App\Http\Controllers\OfflineController;
@@ -25,6 +26,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/offline', [OfflineController::class, 'index'])->name('offline');
     // Dashboard
     Route::get('/auth/verified/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Document
+    Route::resource('/auth/verified/document', DocumentController::class);
+    Route::post('/auth/verified/document/{id}/return-for-revision', [DocumentController::class, 'returnForRevision'])->name('document.return-for-revision');
+    Route::post('/auth/verified/document/{id}/finalize-document', [DocumentController::class, 'finalizeDocument'])->name('document.finalize-document');
+    Route::post('/auth/verified/document/{id}/submit-revision', [DocumentController::class, 'submitRevision'])->name('document.submit-revision');
     // Incoming Documents
     Route::resource('auth/verified/incoming-documents', IncomingController::class)->except('destroy');
     Route::delete('auth/verified/incoming-documents/{document}', [IncomingController::class, 'destroy'])->name('incoming-documents.destroy');

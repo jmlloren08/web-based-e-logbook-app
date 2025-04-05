@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import Release from "./release";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowUpDown, EditIcon } from "lucide-react";
+import { Search, ArrowUpDown, EditIcon, Undo2, Edit } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Swal from "sweetalert2";
 
@@ -39,6 +38,7 @@ const officeTabs = [
 ];
 
 export default function Index({ documents }: { documents: PaginatedResults<IncomingDocument> }) {
+
     const { flash } = usePage().props as { flash?: { success?: string } };
     const [searchQuery, setSearchQuery] = useState('');
     const [sortField, setSortField] = useState<SortField>('updated_at');
@@ -151,7 +151,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                         <Table className="w-full">
                             <TableHeader>
                                 <TableRow>
-                                    <TableCell></TableCell>
+                                    <TableHead></TableHead>
                                     <TableHead className="hidden md:table-cell cursor-pointer" onClick={() => handleSort('document_no')}>
                                         <div className="flex items-center gap-1">
                                             Document No.
@@ -219,21 +219,27 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {sortedDocuments.map((doc: IncomingDocument) => (
+                                {sortedDocuments.map((doc) => (
                                     <TableRow key={doc.id} className="hover:bg-gray-50">
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <Link href={route('incoming-documents.edit', doc.incoming_document.id)}>
+                                                <Link href={route('incoming-documents.edit', doc.id)}>
                                                     <Button
-                                                        variant="default"
+                                                        variant="outline"
                                                         size="sm"
-                                                        className='hover:bg-blue-600 active:scale-95'
-                                                        title='Edit Document'
+                                                        className='hover:text-blue-600 active:scale-95'
+                                                        title={doc.current_state_id === 4 ? "Revise Document" : "Edit Document"}
                                                     >
-                                                        <EditIcon />
+                                                        {doc.current_state_id === 4 ? (
+                                                            <Undo2 />
+                                                        ) : (
+                                                            <Edit />
+                                                        )}
                                                     </Button>
                                                 </Link>
-                                                <Release docId={doc.id} />
+                                                {doc.current_state_id !== 4 && (
+                                                    <Release docId={doc.id} />
+                                                )}
                                             </div>
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell">{doc.document_no}</TableCell>
