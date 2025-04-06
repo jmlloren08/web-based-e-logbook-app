@@ -45,7 +45,7 @@ export default function Dashboard({ stats, recentDocuments }: {
             <div className="container max-w-full mx-auto px-4 py-6 sm:px-6 lg:px-8">
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <Card className="aspect-video rounded-xl bg-muted/50">
+                    <Card className="rounded-xl bg-muted/50">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total Incoming</CardTitle>
                         </CardHeader>
@@ -53,7 +53,7 @@ export default function Dashboard({ stats, recentDocuments }: {
                             <div className="text-2xl font-bold">{stats.totalIncoming}</div>
                         </CardContent>
                     </Card>
-                    <Card className="aspect-video rounded-xl bg-muted/50">
+                    <Card className="rounded-xl bg-muted/50">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total Outgoing</CardTitle>
                         </CardHeader>
@@ -61,7 +61,7 @@ export default function Dashboard({ stats, recentDocuments }: {
                             <div className="text-2xl font-bold">{stats.totalOutgoing}</div>
                         </CardContent>
                     </Card>
-                    <Card className="aspect-video rounded-xl bg-muted/50">
+                    <Card className="rounded-xl bg-muted/50">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Pending Documents</CardTitle>
                         </CardHeader>

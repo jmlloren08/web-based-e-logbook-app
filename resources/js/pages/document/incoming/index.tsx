@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from "@inertiajs/react";
+import { Head, Link, usePage, router } from "@inertiajs/react";
 import { BreadcrumbItem, IncomingDocument, PaginatedResults } from "@/types";
 import AppLayout from "@/layouts/app-layout";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { useEffect, useState } from "react";
 import Release from "./release";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowUpDown, EditIcon, Undo2, Edit } from "lucide-react";
+import { Search, ArrowUpDown, Undo2, Edit, EyeIcon } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Swal from "sweetalert2";
 
@@ -44,6 +44,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
     const [sortField, setSortField] = useState<SortField>('updated_at');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [activeTab, setActiveTab] = useState('all');
+    const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
     useEffect(() => {
         if (flash?.success) {
@@ -55,6 +56,24 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
         }
     }, [flash]);
 
+    // Debounce search query to avoid too many requests
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchQuery(searchQuery);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // Trigger search when debounced query changes
+    useEffect(() => {
+        router.get(
+            route('incoming-documents.index'),
+            { search: debouncedSearchQuery },
+            { preserveState: true, preserveScroll: true }
+        );
+    }, [debouncedSearchQuery]);
+
     const handleSort = (field: SortField) => {
         if (sortField === field) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -64,19 +83,11 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
         }
     };
 
+    // Filter by tab only (search is now handled by the server)
     const filteredDocuments = documents.data.filter(doc => {
-        const searchLower = searchQuery.toLowerCase();
-        const matchesSearch = (
-            doc.document_no.toLowerCase().includes(searchLower) ||
-            doc.incoming_document.other_ref_no.toLowerCase().includes(searchLower) ||
-            doc.incoming_document.from_office_department_unit.toLowerCase().includes(searchLower) ||
-            doc.incoming_document.sender_name.toLowerCase().includes(searchLower) ||
-            doc.title_subject.toLowerCase().includes(searchLower) ||
-            doc.docs_types.toLowerCase().includes(searchLower)
-        );
         const matchesTab = activeTab === 'all' ||
             doc.document_no.toLowerCase().includes(activeTab.toLowerCase());
-        return matchesSearch && matchesTab;
+        return matchesTab;
     });
 
     const sortedDocuments = [...filteredDocuments].sort((a, b) => {
@@ -240,6 +251,16 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                                                 {doc.current_state_id !== 4 && (
                                                     <Release docId={doc.id} />
                                                 )}
+                                                <Link href={route('outgoing-documents.show', { id: doc.id })}>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className='hover:text-blue-600 active:scale-95'
+                                                        title='View Document'
+                                                    >
+                                                        <EyeIcon />
+                                                    </Button>
+                                                </Link>
                                             </div>
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell">{doc.document_no}</TableCell>
@@ -285,28 +306,33 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
 
                     <div className="p-4 border-t border-gray-200">
                         <Pagination>
-                            <PaginationContent className="flex justify-center items-center space-x-2">
-                                {documents.links.map((link: { url: string | null; active: boolean; label: string }, index: number) => (
-                                    <PaginationItem key={index}>
-                                        {link.url ? (
-                                            <Link
-                                                href={link.url}
-                                                preserveState
-                                                preserveScroll
-                                                className={`${link.active ? 'bg-primary text-primary-foreground' : 'hover:bg-gray-100'
-                                                    } px-3 py-2 rounded-md inline-flex items-center justify-center`}
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                            />
-                                        ) : (
-                                            link.label.includes('Previous') ? (
-                                                <PaginationPrevious disabled className="opacity-50 cursor-not-allowed" />
+                            <div className="flex items-center justify-between gap-4">
+                                <PaginationContent className="flex justify-center items-center space-x-2">
+                                    {documents.links.map((link: { url: string | null; active: boolean; label: string }, index: number) => (
+                                        <PaginationItem key={index}>
+                                            {link.url ? (
+                                                <Link
+                                                    href={link.url}
+                                                    preserveState
+                                                    preserveScroll
+                                                    className={`${link.active ? 'bg-primary text-primary-foreground' : 'hover:bg-gray-100'
+                                                        } px-3 py-2 rounded-md inline-flex items-center justify-center`}
+                                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                                />
                                             ) : (
-                                                <PaginationNext disabled className="opacity-50 cursor-not-allowed" />
-                                            )
-                                        )}
-                                    </PaginationItem>
-                                ))}
-                            </PaginationContent>
+                                                link.label.includes('Previous') ? (
+                                                    <PaginationPrevious disabled className="opacity-50 cursor-not-allowed" />
+                                                ) : (
+                                                    <PaginationNext disabled className="opacity-50 cursor-not-allowed" />
+                                                )
+                                            )}
+                                        </PaginationItem>
+                                    ))}
+                                </PaginationContent>
+                                <div className="text-sm text-gray-500">
+                                    Showing {documents.from || 0} to {documents.to || 0} of {documents.total || 0} entries
+                                </div>
+                            </div>
                         </Pagination>
                     </div>
                 </div>

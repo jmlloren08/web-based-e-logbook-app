@@ -26,6 +26,13 @@ export default function Register() {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+        
+        // Validate email domain
+        if (!data.email.endsWith('@arta.gov.ph')) {
+            setData('email', data.email);
+            return;
+        }
+        
         post(route('register'), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
@@ -64,9 +71,12 @@ export default function Register() {
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             disabled={processing}
-                            placeholder="email@example.com"
+                            placeholder="email@arta.gov.ph"
                         />
                         <InputError message={errors.email} />
+                        {data.email && !data.email.endsWith('@arta.gov.ph') && (
+                            <p className="text-sm text-red-500">Only @arta.gov.ph email addresses are allowed</p>
+                        )}
                     </div>
 
                     <div className="grid gap-2">

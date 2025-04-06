@@ -46,7 +46,7 @@ export default function Release({ docId }: { docId: string }) {
                 <Button
                     variant="outline"
                     size="sm"
-                    className='active:scale-95'
+                    className='hover:text-blue-600 active:scale-95'
                     title='Release Document'
                 >
                     <FileInput />

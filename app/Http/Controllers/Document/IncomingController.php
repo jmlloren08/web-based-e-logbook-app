@@ -12,13 +12,26 @@ use Inertia\Inertia;
 
 class IncomingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $documents = Document::with(['currentState', 'incomingDocument'])
-                ->whereIn('current_state_id', [1, 4]) // draft and for revision
-                ->latest()
-                ->paginate(10);
+            $query = Document::with(['currentState', 'incomingDocument'])
+                ->whereIn('current_state_id', [1, 4]); // draft and for revision
+            // Handle search if search parameter is provided
+            if ($request->has('search') && !empty($request->search)) {
+                $searchTerm = $request->search;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('document_no', 'like', "%{$searchTerm}%")
+                      ->orWhere('title_subject', 'like', "%{$searchTerm}%")
+                      ->orWhere('docs_types', 'like', "%{$searchTerm}%")
+                      ->orWhereHas('incomingDocument', function($q) use ($searchTerm) {
+                          $q->where('other_ref_no', 'like', "%{$searchTerm}%")
+                            ->orWhere('from_office_department_unit', 'like', "%{$searchTerm}%")
+                            ->orWhere('sender_name', 'like', "%{$searchTerm}%");
+                      });
+                });
+            }
+            $documents = $query->latest()->paginate(10);
             return Inertia::render('document/incoming/index', ['documents' => $documents]);
         } catch (\Exception $e) {
             Log::error('Document Index Error: ' . $e->getMessage());

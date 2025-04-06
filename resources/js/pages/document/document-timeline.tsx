@@ -9,6 +9,7 @@ interface User {
 
 interface HistoryEvent {
   id: number;
+  state_id: number;
   state: string;
   comments: string;
   timestamp: string;
@@ -23,10 +24,9 @@ interface DocumentTimelineProps {
 }
 
 const DocumentTimeline: React.FC<DocumentTimelineProps> = ({ historyEvents }) => {
-  console.log('History Events:', historyEvents);
   // Sort events by date (newest first)
   const sortedEvents = [...historyEvents].sort((a, b) =>
-    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    b.state_id - a.state_id && new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
   // Function to get the appropriate icon based on event state
@@ -111,7 +111,7 @@ const DocumentTimeline: React.FC<DocumentTimelineProps> = ({ historyEvents }) =>
                   </div>
                   <div className="mt-2 text-xs text-gray-600">
                     <img
-                      src={`/storage/${event.metadata.signature_path}`}
+                      src={`/public/public/${event.metadata.signature_path}`}
                       alt="Signature"
                       className="w-24"
                     />

@@ -12,14 +12,25 @@ use Inertia\Inertia;
 
 class OutgoingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $documents = Document::with(['currentState', 'outgoingDocument'])
-                ->whereIn('current_state_id', [2, 3, 6]) // sent, received, finalized
-                // ->where('is_final', false)
-                ->latest()
-                ->paginate(10);
+            $query = Document::with(['currentState', 'outgoingDocument'])
+                ->whereIn('current_state_id', [2, 3, 6]); // sent, received, finalized
+            // Handle search if search parameter is provided
+            if ($request->has('search') && !empty($request->search)) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('document_no', 'like', "%{$searchTerm}%")
+                        ->orWhere('title_subject', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('outgoingDocument', function ($q) use ($searchTerm) {
+                            $q->where('forwarded_to_office_department_unit', 'like', "%{$searchTerm}%")
+                                ->orWhere('received_by', 'like', "%{$searchTerm}%")
+                                ->orWhere('remarks', 'like', "%{$searchTerm}%");
+                        });
+                });
+            }
+            $documents = $query->latest()->paginate(10);
             return Inertia::render('document/outgoing/index', ['documents' => $documents]);
         } catch (\Exception $e) {
             Log::error('Document Index Error: ' . $e->getMessage());
@@ -97,6 +108,7 @@ class OutgoingController extends Controller
                 $user = $event->user;
                 return [
                     'id' => $event->id,
+                    // 'state_id' => $event->document_state_id,
                     'state' => $event->state->name,
                     'user' => $user ? [
                         'name' => $user->name,
