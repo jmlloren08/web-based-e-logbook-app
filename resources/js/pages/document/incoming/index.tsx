@@ -7,7 +7,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { useEffect, useState } from "react";
 import Release from "./release";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowUpDown, Undo2, Edit, EyeIcon } from "lucide-react";
+import { Search, ArrowUpDown, Undo2, Edit, EyeIcon, FilePenLine, RotateCcw } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Swal from "sweetalert2";
 
@@ -69,10 +69,10 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
     useEffect(() => {
         router.get(
             route('incoming-documents.index'),
-            { search: debouncedSearchQuery },
+            { search: debouncedSearchQuery, tab: activeTab },
             { preserveState: true, preserveScroll: true }
         );
-    }, [debouncedSearchQuery]);
+    }, [debouncedSearchQuery, activeTab]);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -83,14 +83,8 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
         }
     };
 
-    // Filter by tab only (search is now handled by the server)
-    const filteredDocuments = documents.data.filter(doc => {
-        const matchesTab = activeTab === 'all' ||
-            doc.document_no.toLowerCase().includes(activeTab.toLowerCase());
-        return matchesTab;
-    });
-
-    const sortedDocuments = [...filteredDocuments].sort((a, b) => {
+    // No need to filter by tab anymore as it's handled by the server
+    const sortedDocuments = [...documents.data].sort((a, b) => {
         const aValue = sortField === 'document_no' ? a.document_no :
             sortField === 'other_ref_no' ? a.incoming_document.other_ref_no :
                 sortField === 'date_time_received' ? new Date(a.incoming_document.date_time_received).getTime() :
@@ -242,9 +236,9 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                                                         title={doc.current_state_id === 4 ? "Revise Document" : "Edit Document"}
                                                     >
                                                         {doc.current_state_id === 4 ? (
-                                                            <Undo2 />
+                                                            <RotateCcw />
                                                         ) : (
-                                                            <Edit />
+                                                            <FilePenLine />
                                                         )}
                                                     </Button>
                                                 </Link>

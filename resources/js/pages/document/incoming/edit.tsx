@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeftIcon } from "lucide-react";
 import InputError from "@/components/input-error";
 import Swal from "sweetalert2";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -89,8 +90,33 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                     </div>
 
                                     <div className="mb-4">
-                                        <Label>Forward To *</Label>
-                                        <Input value={data.forwarded_to_office_department_unit} onChange={e => setData('forwarded_to_office_department_unit', e.target.value)} required />
+                                        <Label htmlFor='forwarded_to_office_department_unit' className='font-medium'>
+                                            Forwarded To
+                                        </Label>
+                                        <Select
+                                            value={data.forwarded_to_office_department_unit}
+                                            onValueChange={(value) => setData('forwarded_to_office_department_unit', value)}
+                                            required
+                                        >
+                                            <SelectTrigger id="forwarded_to_office_department_unit">
+                                                <SelectValue placeholder="Select a office/department/unit" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="ODG">OFFICE OF THE DIRECTOR GENERAL</SelectItem>
+                                                <SelectItem value="ODDGO">OFFICE OF THE DEPUTY DIRECTOR GENERAL FOR OPERATIONS</SelectItem>
+                                                <SelectItem value="ODDGL">OFFICE OF THE DEPUTY DIRECTOR GENERAL FOR LEGAL</SelectItem>
+                                                <SelectItem value="ODDGAF">OFFICE OF THE DEPUTY DIRECTOR GENERAL FOR ADMINISTRATION AND FINANCE</SelectItem>
+                                                <SelectItem value="BRO">BETTER REGULATIONS OFFICE</SelectItem>
+                                                <SelectItem value="CMEO">COMPLIANCE MONITORING AND EVALUATION OFFICE</SelectItem>
+                                                <SelectItem value="DBD">DOING BUSINESS DIVISION</SelectItem>
+                                                <SelectItem value="RMTD">REGULATORY MANAGEMENT AND TRAINING DIVISION</SelectItem>
+                                                <SelectItem value="RFO">REGIONAL FIELD OFFICE</SelectItem>
+                                                <SelectItem value="SULONG">SULONG</SelectItem>
+                                                <SelectItem value="ADMIN">ADMIN</SelectItem>
+                                                <SelectItem value="FINANCE">FINANCE</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={errors.forwarded_to_office_department_unit} />
                                     </div>
                                 </>
                             )}

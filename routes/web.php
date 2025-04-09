@@ -9,7 +9,6 @@ use App\Http\Controllers\Archive\OddglController;
 use App\Http\Controllers\Archive\OddgoController;
 use App\Http\Controllers\Archive\OdgController;
 use App\Http\Controllers\Archive\RfoController;
-use App\Http\Controllers\Document\ArchiveController;
 use App\Http\Controllers\Document\DashboardController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\IncomingController;
@@ -28,7 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/auth/verified/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // Document
     Route::resource('/auth/verified/document', DocumentController::class);
-    Route::post('/auth/verified/document/{id}/return-for-revision', [DocumentController::class, 'returnForRevision'])->name('document.return-for-revision');
+    Route::post('/auth/verified/document/{id}/return-document-for', [DocumentController::class, 'returnDocumentFor'])->name('document.return-document-for');
     Route::post('/auth/verified/document/{id}/finalize-document', [DocumentController::class, 'finalizeDocument'])->name('document.finalize-document');
     Route::post('/auth/verified/document/{id}/submit-revision', [DocumentController::class, 'submitRevision'])->name('document.submit-revision');
     // Incoming Documents

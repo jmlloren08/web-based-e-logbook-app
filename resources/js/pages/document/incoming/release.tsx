@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import InputError from '@/components/input-error';
 import { cn } from '@/lib/utils';
 import { Inertia } from '@inertiajs/inertia';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Release({ docId }: { docId: string }) {
 
@@ -81,22 +82,34 @@ export default function Release({ docId }: { docId: string }) {
 
                     <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 items-center">
-                            <Label htmlFor='forwarded_to_office_department' className='font-medium'>
+                            <Label htmlFor='forwarded_to_office_department_unit' className='font-medium'>
                                 Forwarded To
                             </Label>
                             <div>
-                                <Input
-                                    id='forwarded_to_office_department'
+                                <Select
                                     value={data.forwarded_to_office_department_unit}
-                                    onChange={(e) => setData('forwarded_to_office_department_unit', e.target.value)}
-                                    placeholder='Enter department/office/unit name'
-                                    className='w-full'
+                                    onValueChange={(value) => setData('forwarded_to_office_department_unit', value)}
                                     required
-                                />
-                                <InputError
-                                    message={errors.forwarded_to_office_department_unit}
-                                    className="mt-2"
-                                />
+                                >
+                                    <SelectTrigger id="forwarded_to_office_department_unit">
+                                        <SelectValue placeholder="Select a office/department/unit" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ODG">ODG</SelectItem>
+                                        <SelectItem value="ODDGO">ODDGO</SelectItem>
+                                        <SelectItem value="ODDGL">ODDGL</SelectItem>
+                                        <SelectItem value="ODDGAF">ODDGAF</SelectItem>
+                                        <SelectItem value="BRO">BRO</SelectItem>
+                                        <SelectItem value="CMEO">CMEO</SelectItem>
+                                        <SelectItem value="DBD">DBD</SelectItem>
+                                        <SelectItem value="RMTD">RMTD</SelectItem>
+                                        <SelectItem value="RFO">RFO</SelectItem>
+                                        <SelectItem value="SULONG">SULONG</SelectItem>
+                                        <SelectItem value="ADMIN">ADMIN</SelectItem>
+                                        <SelectItem value="FINANCE">FINANCE</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.forwarded_to_office_department_unit} />
                             </div>
                         </div>
                     </div>

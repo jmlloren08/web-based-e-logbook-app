@@ -58,7 +58,7 @@ class Document extends Model
         ]);
     }
     // Helper to return document for revision
-    public function returnForRevision($comment, $metadata = [])
+    public function returnDocumentFor($comment, $metadata = [])
     {
         // Update document state
         $this->current_state_id = 4; // returned
@@ -85,7 +85,7 @@ class Document extends Model
         );
     }
     // Helper to finalize document
-    public function finalizeDocument($comments = 'Document has been finalized and completed.')
+    public function finalizeDocument($comments = 'Document has been finalized and completed.', $metadata = [])
     {
         // Update document state
         $this->current_state_id = 6; // finalized
@@ -95,6 +95,7 @@ class Document extends Model
         return $this->addHistoryEvent(
             6, // finalized state
             $comments,
+            $metadata,
         );
     }
 }

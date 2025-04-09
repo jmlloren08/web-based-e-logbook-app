@@ -19,7 +19,7 @@ class DocumentController extends Controller
 
         return response()->json($documents);
     }
-    public function returnForRevision(Request $request, $id)
+    public function returnDocumentFor(Request $request, $id)
     {
         try {
             $request->validate([
@@ -39,12 +39,12 @@ class DocumentController extends Controller
                 'return_date' => now()->toDateTimeString(),
             ];
 
-            $document->returnForRevision('Document has been returned for revision: ' . $request->comments, $metadata);
+            $document->returnDocumentFor('Document has been returned: ' . $request->comments, $metadata);
 
-            return redirect()->route('incoming-documents.index', $document)->with('success', 'Document has been returned for revision.');
+            return redirect()->route('incoming-documents.index', $document)->with('success', 'Document has been returned to recipient.');
         } catch (\Exception $e) {
-            Log::error('Document Return for Revision Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error returning document for revision: ' . $e->getMessage());
+            Log::error('Document Return Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error returning document: ' . $e->getMessage());
         }
     }
     public function submitRevision(Request $request, $id)
@@ -134,12 +134,14 @@ class DocumentController extends Controller
                 return redirect()->back()->with('error', 'Document must be received before finalizing.');
             }
 
-            // $metadata = [
-            //     'finalized_by' => auth()->user()->name ?? 'System',
-            //     'finalized_date' => now()->toDateTimeString(),
-            // ];
+            $metadata = [
+                'finalized_by' => auth()->user()->name ?? 'System',
+                'finalized_date' => now()->toDateTimeString(),
+            ];
             // Finalize the document
-            $document->finalizeDocument('Document has been finalized and completed: ' . $request->comments);
+            $document->finalizeDocument('Document has been finalized and completed: ' . $request->comments, [
+                $metadata,
+            ]);
 
             return redirect()->route('outgoing-documents.index', $document)->with('success', 'Document has been finalized.');
         } catch (\Exception $e) {

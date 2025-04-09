@@ -2,7 +2,7 @@ import { Head, Link, usePage, router } from "@inertiajs/react";
 import { BreadcrumbItem, OutgoingDocument, PaginatedResults } from "@/types";
 import AppLayout from "@/layouts/app-layout";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useEffect, useState } from "react";
 import Receive from "./receive";
 import { Input } from "@/components/ui/input";
@@ -75,10 +75,10 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
     useEffect(() => {
         router.get(
             route('outgoing-documents.index'),
-            { search: debouncedSearchQuery },
+            { search: debouncedSearchQuery, tab: activeTab },
             { preserveState: true, preserveScroll: true }
         );
-    }, [debouncedSearchQuery]);
+    }, [debouncedSearchQuery, activeTab]);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -89,14 +89,8 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
         }
     };
 
-    // Filter by tab only (search is now handled by the server)
-    const filteredDocuments = documents.data.filter(doc => {
-        const matchesTab = activeTab === 'all' ||
-            doc.document_no.toLowerCase().includes(activeTab.toLowerCase());
-        return matchesTab;
-    });
-
-    const sortedDocuments = [...filteredDocuments].sort((a, b) => {
+    // No need to filter by tab anymore as it's handled by the server
+    const sortedDocuments = [...documents.data].sort((a, b) => {
         const aValue = sortField === 'document_no' ? a.document_no :
             sortField === 'date_released' ? new Date(a.outgoing_document.date_released).getTime() :
                 sortField === 'forwarded_to_office_department_unit' ? a.outgoing_document.forwarded_to_office_department_unit :

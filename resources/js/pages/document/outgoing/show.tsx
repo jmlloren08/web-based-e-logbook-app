@@ -78,9 +78,9 @@ export default function Show({ document, historyEvents }: {
                 Swal.showLoading();
             }
         });
-        await router.post(route('document.return-for-revision', document.id), {
-            comments: returnReason,
-            return_reason: returnComments,
+        await router.post(route('document.return-document-for', document.id), {
+            comments: returnComments,
+            return_reason: returnReason,
         }, {
             onSuccess: () => setShowReturnModal(false),
         });
@@ -163,7 +163,7 @@ export default function Show({ document, historyEvents }: {
                             variant="default"
                             className="hover:bg-yellow-600 active:scale-95"
                         >
-                            Return for Revision
+                            Return Document
                         </Button>
                     )}
 
@@ -183,7 +183,7 @@ export default function Show({ document, historyEvents }: {
                 <Dialog open={showReturnModal} onOpenChange={setShowReturnModal}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Return Document for Revision</DialogTitle>
+                            <DialogTitle>Return Document</DialogTitle>
                         </DialogHeader>
                         <form onSubmit={handleReturnSubmit}>
                             <div className="grid gap-4 py-4">
@@ -198,9 +198,19 @@ export default function Show({ document, historyEvents }: {
                                             <SelectValue placeholder="Select a reason" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Missing Information">Missing Information</SelectItem>
-                                            <SelectItem value="Incorrect Information">Incorrect Information</SelectItem>
-                                            <SelectItem value="Requires Clarification">Requires Clarification</SelectItem>
+                                            <SelectItem value="For Revision">For Revision</SelectItem>
+                                            <SelectItem value="For Correction">For Correction</SelectItem>
+                                            <SelectItem value="For Initial">For Initial</SelectItem>
+                                            <SelectItem value="For Signature">For Signature</SelectItem>
+                                            <SelectItem value="For Approval">For Approval</SelectItem>
+                                            <SelectItem value="For Review">For Review</SelectItem>
+                                            <SelectItem value="For Numbering">For Numbering</SelectItem>
+                                            <SelectItem value="For Appropriate Action">For Appropriate Action</SelectItem>
+                                            <SelectItem value="For Encoding">For Encoding</SelectItem>
+                                            <SelectItem value="For Filing">For Filing</SelectItem>
+                                            <SelectItem value="For Scanning">For Scanning</SelectItem>
+                                            <SelectItem value="For Printing">For Printing</SelectItem>
+                                            <SelectItem value="For Archiving">For Archiving</SelectItem>
                                             <SelectItem value="Other">Other</SelectItem>
                                         </SelectContent>
                                     </Select>

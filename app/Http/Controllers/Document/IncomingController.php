@@ -31,7 +31,14 @@ class IncomingController extends Controller
                       });
                 });
             }
-            $documents = $query->latest()->paginate(10);
+            
+            // Handle tab filtering if tab parameter is provided and not 'all'
+            if ($request->has('tab') && $request->tab !== 'all') {
+                $tabValue = $request->tab;
+                $query->where('document_no', 'like', "%{$tabValue}%");
+            }
+            
+            $documents = $query->latest('updated_at')->paginate(10);
             return Inertia::render('document/incoming/index', ['documents' => $documents]);
         } catch (\Exception $e) {
             Log::error('Document Index Error: ' . $e->getMessage());

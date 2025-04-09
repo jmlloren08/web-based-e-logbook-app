@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFoo
 import { FileOutput } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Receive({ docId, documentNo, docTitleSubject }: { docId: string; documentNo: string; docTitleSubject: string }) {
 
@@ -137,16 +138,29 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="received_by" className="mb-2">
-                                        Received By
-                                    </Label>
-                                    <Input
-                                        id="received_by"
+                                    <Label htmlFor="received_by">Received By</Label>
+                                    <Select
                                         value={data.received_by}
-                                        onChange={(e) => setData('received_by', e.target.value)}
-                                        placeholder="Enter name"
+                                        onValueChange={(value) => setData('received_by', value)}
                                         required
-                                    />
+                                    >
+                                        <SelectTrigger id="received_by">
+                                            <SelectValue placeholder="Select a recipient" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="ODG-Irish">ODG-Irish</SelectItem>
+                                            <SelectItem value="ODG-Cesar">ODG-Cesar</SelectItem>
+                                            <SelectItem value="ODG-Beltran">ODG-Beltran</SelectItem>
+                                            <SelectItem value="BRO-Mary Ann">BRO-Mary Ann</SelectItem>
+                                            <SelectItem value="CMEO-Desa">CMEO-Desa</SelectItem>
+                                            <SelectItem value="CMEO-Marvin">CMEO-Marvin</SelectItem>
+                                            <SelectItem value="RFO-Kenna">RFO-Kenna</SelectItem>
+                                            <SelectItem value="RFO-Lexter">RFO-Lexter</SelectItem>
+                                            <SelectItem value="Admin-JP">Admin-JP</SelectItem>
+                                            <SelectItem value="Admin-Quennie Castillo">Admin-Quennie Castillo</SelectItem>
+                                            <SelectItem value="Finance">Finance</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                     <InputError message={validationErrors.received_by || errors.received_by} />
                                 </div>
                                 <div>
@@ -170,14 +184,31 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                             <h3 className="text-base font-semibold text-gray-700 mb-3">
                                 Remarks (Optional)
                             </h3>
-                            <Textarea
-                                id="remarks"
+                            <Select
                                 value={data.remarks}
-                                onChange={(e) => setData('remarks', e.target.value)}
-                                placeholder="Enter any additional remarks"
-                                rows={3}
-                            />
-                            <InputError message={errors.remarks} />
+                                onValueChange={(value) => setData('remarks', value)}
+                                required
+                            >
+                                <SelectTrigger id="remarks">
+                                    <SelectValue placeholder="Select a remarks" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="For Revision">For Revision</SelectItem>
+                                    <SelectItem value="For Correction">For Correction</SelectItem>
+                                    <SelectItem value="For Initial">For Initial</SelectItem>
+                                    <SelectItem value="For Signature">For Signature</SelectItem>
+                                    <SelectItem value="For Approval">For Approval</SelectItem>
+                                    <SelectItem value="For Review">For Review</SelectItem>
+                                    <SelectItem value="For Numbering">For Numbering</SelectItem>
+                                    <SelectItem value="For Appropriate Action">For Appropriate Action</SelectItem>
+                                    <SelectItem value="For Encoding">For Encoding</SelectItem>
+                                    <SelectItem value="For Filing">For Filing</SelectItem>
+                                    <SelectItem value="For Scanning">For Scanning</SelectItem>
+                                    <SelectItem value="For Printing">For Printing</SelectItem>
+                                    <SelectItem value="For Archiving">For Archiving</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError message={validationErrors.remarks || errors.remarks} />
                         </div>
 
                         {/* Signature */}
