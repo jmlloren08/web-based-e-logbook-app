@@ -115,7 +115,7 @@ class DocumentController extends Controller
             }
             // Send the revised document
             $document->sendRevised($outgoingMeta);
-            return redirect()->route('outgoing-documents.index', $document)->with('success', 'Revised document sent successfully.');
+            return redirect()->route('outgoing-documents.index', $document)->with('success', 'Forwarded to ' . $outgoingMeta['forwarded_to_office_department_unit'] . ' successfully.');
         } catch (\Exception $e) {
             Log::error('Submit Revision Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error submitting document for revision: ' . $e->getMessage());

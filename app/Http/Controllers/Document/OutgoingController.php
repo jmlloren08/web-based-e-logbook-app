@@ -94,7 +94,7 @@ class OutgoingController extends Controller
                 'remarks' => $validatedData['remarks'] ?? null,
                 'signature_path' => $validatedData['signature_path'],
             ]);
-            return redirect()->route('outgoing-documents.index')->with('success', 'Received document successfully');
+            return redirect()->route('outgoing-documents.index')->with('success', 'Received document by ' . $validatedData['received_by'] . ' successfully.');
         } catch (\Exception $e) {
             Log::error('Document Log Store Error: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
