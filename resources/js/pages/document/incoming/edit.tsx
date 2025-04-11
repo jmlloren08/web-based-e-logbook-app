@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import { BreadcrumbItem, IncomingDocument } from "@/types";
 import AppLayout from "@/layouts/app-layout";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import InputError from "@/components/input-error";
 import Swal from "sweetalert2";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect } from "react";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,8 +18,22 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Edit({ document }: { document: IncomingDocument }) {
+interface Props {
+    offices: Array<{
+        id: string;
+        name: string;
+        code: string;
+    }>;
+    documentTypes: Array<{
+        id: string;
+        name: string;
+        code: string;
+    }>;
+}
 
+export default function Edit({ document, offices, documentTypes }: Props & { document: IncomingDocument }) {
+
+    const { flash } = usePage().props as { flash?: { error?: string } };
     const { data, setData, put, post, processing, errors } = useForm({
         title_subject: document.title_subject,
         docs_types: document.docs_types,
@@ -51,6 +66,16 @@ export default function Edit({ document }: { document: IncomingDocument }) {
             put(route('incoming-documents.update', document.id), { preserveScroll: true });
         }
     };
+
+    useEffect(() => {
+        if (flash?.error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: flash.error,
+            });
+        }
+    }, [flash]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -102,18 +127,11 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                                 <SelectValue placeholder="Select a office/department/unit" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="ODG">OFFICE OF THE DIRECTOR GENERAL</SelectItem>
-                                                <SelectItem value="ODDGO">OFFICE OF THE DEPUTY DIRECTOR GENERAL FOR OPERATIONS</SelectItem>
-                                                <SelectItem value="ODDGL">OFFICE OF THE DEPUTY DIRECTOR GENERAL FOR LEGAL</SelectItem>
-                                                <SelectItem value="ODDGAF">OFFICE OF THE DEPUTY DIRECTOR GENERAL FOR ADMINISTRATION AND FINANCE</SelectItem>
-                                                <SelectItem value="BRO">BETTER REGULATIONS OFFICE</SelectItem>
-                                                <SelectItem value="CMEO">COMPLIANCE MONITORING AND EVALUATION OFFICE</SelectItem>
-                                                <SelectItem value="DBD">DOING BUSINESS DIVISION</SelectItem>
-                                                <SelectItem value="RMTD">REGULATORY MANAGEMENT AND TRAINING DIVISION</SelectItem>
-                                                <SelectItem value="RFO">REGIONAL FIELD OFFICE</SelectItem>
-                                                <SelectItem value="SULONG">SULONG</SelectItem>
-                                                <SelectItem value="ADMIN">ADMIN</SelectItem>
-                                                <SelectItem value="FINANCE">FINANCE</SelectItem>
+                                                {offices.map((office) => (
+                                                    <SelectItem key={office.id} value={office.code}>
+                                                        {office.name}
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                         <InputError message={errors.forwarded_to_office_department_unit} />
@@ -136,12 +154,22 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                 {/* Document Types */}
                                 <div className="space-y-2">
                                     <Label htmlFor="docs_types">Document Types</Label>
-                                    <Input
-                                        id="docs_types"
+                                    <Select
                                         value={data.docs_types}
-                                        onChange={e => setData('docs_types', e.target.value)}
-                                        className={errors.docs_types ? 'border-red-500' : ''}
-                                    />
+                                        onValueChange={(value) => setData('docs_types', value)}
+                                        required
+                                    >
+                                        <SelectTrigger id="docs_types">
+                                            <SelectValue placeholder="Select a office/department/unit" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {documentTypes.map((dt) => (
+                                                <SelectItem key={dt.id} value={dt.code}>
+                                                    {dt.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <InputError message={errors.docs_types} className="mt-1" />
                                 </div>
                                 {/* Other Ref No */}
@@ -170,12 +198,22 @@ export default function Edit({ document }: { document: IncomingDocument }) {
                                 {/* From Office/Department */}
                                 <div className="space-y-2">
                                     <Label htmlFor="from_office_department_unit">From Office/Department</Label>
-                                    <Input
-                                        id="from_office_department_unit"
+                                    <Select
                                         value={data.from_office_department_unit}
-                                        onChange={e => setData('from_office_department_unit', e.target.value)}
-                                        className={errors.from_office_department_unit ? 'border-red-500' : ''}
-                                    />
+                                        onValueChange={(value) => setData('from_office_department_unit', value)}
+                                        required
+                                    >
+                                        <SelectTrigger id="from_office_department_unit">
+                                            <SelectValue placeholder="Select a office/department/unit" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {offices.map((office) => (
+                                                <SelectItem key={office.id} value={office.code}>
+                                                    {office.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <InputError message={errors.from_office_department_unit} className="mt-1" />
                                 </div>
                                 {/* Sender Name */}

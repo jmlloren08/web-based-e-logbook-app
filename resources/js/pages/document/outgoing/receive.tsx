@@ -5,15 +5,17 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import InputError from '@/components/input-error';
 import SignatureCanvas from 'react-signature-canvas';
-import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { FileOutput } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import axios from 'axios';
 
 export default function Receive({ docId, documentNo, docTitleSubject }: { docId: string; documentNo: string; docTitleSubject: string }) {
 
+    const [recipients, setRecipients] = useState([]);
+    const [remarks, setRemarks] = useState([]);
     const [open, setOpen] = useState(false);
     const signaturePadRef = useRef<SignatureCanvas | null>(null);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -110,6 +112,27 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
         }
     }
 
+    useEffect(() => {
+        const fetchRecipients = async () => {
+            try {
+                const response = await axios.get('/auth/verified/get-recipients-for-receive');
+                setRecipients(response.data);
+            } catch (error) {
+                console.error('Error fetching recipients: ', error);
+            }
+        }
+        const fetchRemarks = async () => {
+            try {
+                const response = await axios.get('/auth/verified/get-remarks-for-receive');
+                setRemarks(response.data);
+            } catch (error) {
+                console.error('Error fetching remarks: ', error);
+            }
+        }
+        fetchRemarks();
+        fetchRecipients();
+    }, []);
+
     return (
         <AlertDialog open={open} onOpenChange={handleOpenChange}>
             <AlertDialogTrigger asChild>
@@ -148,17 +171,11 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                                             <SelectValue placeholder="Select a recipient" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="ODG-Irish">ODG-Irish</SelectItem>
-                                            <SelectItem value="ODG-Cesar">ODG-Cesar</SelectItem>
-                                            <SelectItem value="ODG-Beltran">ODG-Beltran</SelectItem>
-                                            <SelectItem value="BRO-Mary Ann">BRO-Mary Ann</SelectItem>
-                                            <SelectItem value="CMEO-Desa">CMEO-Desa</SelectItem>
-                                            <SelectItem value="CMEO-Marvin">CMEO-Marvin</SelectItem>
-                                            <SelectItem value="RFO-Kenna">RFO-Kenna</SelectItem>
-                                            <SelectItem value="RFO-Lexter">RFO-Lexter</SelectItem>
-                                            <SelectItem value="Admin-JP">Admin-JP</SelectItem>
-                                            <SelectItem value="Admin-Quennie Castillo">Admin-Quennie Castillo</SelectItem>
-                                            <SelectItem value="Finance">Finance</SelectItem>
+                                            {recipients.map((recipient) => (
+                                                <SelectItem key={recipient.id} value={recipient.code}>
+                                                    {recipient.code}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <InputError message={validationErrors.received_by || errors.received_by} />
@@ -193,19 +210,11 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                                     <SelectValue placeholder="Select a remarks" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="For Revision">For Revision</SelectItem>
-                                    <SelectItem value="For Correction">For Correction</SelectItem>
-                                    <SelectItem value="For Initial">For Initial</SelectItem>
-                                    <SelectItem value="For Signature">For Signature</SelectItem>
-                                    <SelectItem value="For Approval">For Approval</SelectItem>
-                                    <SelectItem value="For Review">For Review</SelectItem>
-                                    <SelectItem value="For Numbering">For Numbering</SelectItem>
-                                    <SelectItem value="For Appropriate Action">For Appropriate Action</SelectItem>
-                                    <SelectItem value="For Encoding">For Encoding</SelectItem>
-                                    <SelectItem value="For Filing">For Filing</SelectItem>
-                                    <SelectItem value="For Scanning">For Scanning</SelectItem>
-                                    <SelectItem value="For Printing">For Printing</SelectItem>
-                                    <SelectItem value="For Archiving">For Archiving</SelectItem>
+                                    {remarks.map((remark) => (
+                                        <SelectItem key={remark.id} value={remark.name}>
+                                            {remark.name}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                             <InputError message={validationErrors.remarks || errors.remarks} />

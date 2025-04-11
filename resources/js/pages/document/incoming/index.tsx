@@ -7,7 +7,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { useEffect, useState } from "react";
 import Release from "./release";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowUpDown, Undo2, Edit, EyeIcon, FilePenLine, RotateCcw } from "lucide-react";
+import { Search, ArrowUpDown, EyeIcon, FilePenLine, RotateCcw } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Swal from "sweetalert2";
 

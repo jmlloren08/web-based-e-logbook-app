@@ -13,6 +13,10 @@ use App\Http\Controllers\Document\DashboardController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\IncomingController;
 use App\Http\Controllers\Document\OutgoingController;
+use App\Http\Controllers\Management\OfficeController;
+use App\Http\Controllers\Management\DocumentTypeController;
+use App\Http\Controllers\Management\RecipientController;
+use App\Http\Controllers\Management\RemarksController;
 use App\Http\Controllers\OfflineController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -36,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('auth/verified/incoming-documents/{id}/restore', [IncomingController::class, 'restore'])->name('incoming-documents.restore');
     Route::delete('auth/verified/incoming-documents/{id}/force-delete', [IncomingController::class, 'forceDelete'])->name('incoming-documents.force-delete');
     Route::post('auth/verified/incoming-documents/release', [IncomingController::class, 'release'])->name('incoming-documents.release');
+    Route::get('auth/verified/get-offices-for-release', [IncomingController::class, 'getOfficesForReleaseDialog'])->name('get-offices-for-release');
     // Outgoing Documents
     Route::put('auth/verified/outgoing-documents/{id}/modify', [OutgoingController::class, 'modify'])->name('outgoing-documents.modify');
     Route::resource('auth/verified/outgoing-documents', OutgoingController::class)->except(['destroy', 'update']);
@@ -43,6 +48,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('auth/verified/outgoing-documents/{document}', [OutgoingController::class, 'destroy'])->name('outgoing-documents.destroy');
     Route::post('auth/verified/outgoing-documents/{id}/restore', [OutgoingController::class, 'restore'])->name('outgoing-documents.restore');
     Route::delete('auth/verified/outgoing-documents/{id}/force-delete', [OutgoingController::class, 'forceDelete'])->name('outgoing-documents.force-delete');
+    Route::get('auth/verified/get-recipients-for-receive', [OutgoingController::class, 'getRecipientsForReceive'])->name('get-recipients-for-receive');
+    Route::get('auth/verified/get-remarks-for-receive', [OutgoingController::class, 'getRemarksForReceive'])->name('get-remarks-for-receive');
+    // Management 
+    Route::resource('auth/verified/management/offices', OfficeController::class);
+    Route::resource('auth/verified/management/document-types', DocumentTypeController::class);
+    Route::resource('auth/verified/management/recipients', RecipientController::class);
+    Route::resource('auth/verified/management/remarks', RemarksController::class);
     // Archive Routes
     Route::prefix('document/archive')->name('document.archive.')->group(function () {
         Route::get('/odg', [OdgController::class, 'index'])->name('odg.index');
@@ -58,6 +70,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin-only routes
     Route::middleware(['admin'])->group(function () {
         // Route::resource('users', UserController::class);
+    });
+    // Fallback route
+    Route::fallback(function () {
+        return Inertia::render('errors/404', ['status' => 404]);
     });
 });
 

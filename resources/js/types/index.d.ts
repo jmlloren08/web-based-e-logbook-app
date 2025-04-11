@@ -30,14 +30,43 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
+export interface Remarks {
+    id: string;
+    name: string;
+    is_active: boolean;
+}
+
+export interface Recipients {
+    id: string;
+    name: string;
+    code: string;
+    is_active: boolean;
+}
+
+export interface DocumentTypes {
+    id: string;
+    name: string;
+    code: string;
+    is_active: boolean;
+}
+
+export interface Offices {
+    id: string;
+    name: string;
+    code: string;
+    description?: string;
+    address?: string;
+    contact_number?: string;
+    email?: string;
+    is_active: boolean;
+} 
+
 export interface User {
     id: number;
     name: string;
     email: string;
     avatar?: string;
     email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
 

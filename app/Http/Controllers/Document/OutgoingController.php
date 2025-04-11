@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\IncomingDocument;
 use App\Models\OutgoingDocument;
+use App\Models\Recipients;
+use App\Models\Remarks;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -30,13 +32,13 @@ class OutgoingController extends Controller
                         });
                 });
             }
-            
+
             // Handle tab filtering if tab parameter is provided and not 'all'
             if ($request->has('tab') && $request->tab !== 'all') {
                 $tabValue = $request->tab;
                 $query->where('document_no', 'like', "%{$tabValue}%");
             }
-            
+
             $documents = $query->latest('updated_at')->paginate(10);
             return Inertia::render('document/outgoing/index', ['documents' => $documents]);
         } catch (\Exception $e) {
@@ -98,6 +100,32 @@ class OutgoingController extends Controller
         } catch (\Exception $e) {
             Log::error('Document Log Store Error: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+    public function getRecipientsForReceive()
+    {
+        try {
+            $recipients = Recipients::select('id', 'name', 'code')
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->get();
+            return response()->json($recipients);
+        } catch (\Exception $e) {
+            Log::error('Error fetching recipients: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+    public function getRemarksForReceive()
+    {
+        try {
+            $remarks = Remarks::select('id', 'name')
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->get();
+            return response()->json($remarks);
+        } catch (\Exception $e) {
+            Log::error('Error fetching remarks: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 422);
         }
     }
     public function show($id)

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Document;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Models\DocumentTypes;
 use App\Models\IncomingDocument;
+use App\Models\Offices;
 use App\Models\OutgoingDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -20,24 +22,22 @@ class IncomingController extends Controller
             // Handle search if search parameter is provided
             if ($request->has('search') && !empty($request->search)) {
                 $searchTerm = $request->search;
-                $query->where(function($q) use ($searchTerm) {
+                $query->where(function ($q) use ($searchTerm) {
                     $q->where('document_no', 'like', "%{$searchTerm}%")
-                      ->orWhere('title_subject', 'like', "%{$searchTerm}%")
-                      ->orWhere('docs_types', 'like', "%{$searchTerm}%")
-                      ->orWhereHas('incomingDocument', function($q) use ($searchTerm) {
-                          $q->where('other_ref_no', 'like', "%{$searchTerm}%")
-                            ->orWhere('from_office_department_unit', 'like', "%{$searchTerm}%")
-                            ->orWhere('sender_name', 'like', "%{$searchTerm}%");
-                      });
+                        ->orWhere('title_subject', 'like', "%{$searchTerm}%")
+                        ->orWhere('docs_types', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('incomingDocument', function ($q) use ($searchTerm) {
+                            $q->where('other_ref_no', 'like', "%{$searchTerm}%")
+                                ->orWhere('from_office_department_unit', 'like', "%{$searchTerm}%")
+                                ->orWhere('sender_name', 'like', "%{$searchTerm}%");
+                        });
                 });
             }
-            
             // Handle tab filtering if tab parameter is provided and not 'all'
             if ($request->has('tab') && $request->tab !== 'all') {
                 $tabValue = $request->tab;
                 $query->where('document_no', 'like', "%{$tabValue}%");
             }
-            
             $documents = $query->latest('updated_at')->paginate(10);
             return Inertia::render('document/incoming/index', ['documents' => $documents]);
         } catch (\Exception $e) {
@@ -48,7 +48,18 @@ class IncomingController extends Controller
     public function create()
     {
         try {
-            return Inertia::render('document/incoming/create');
+            $offices = Offices::select('id', 'name', 'code')
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->get();
+            $documentTypes = DocumentTypes::select('id', 'name', 'code')
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->get();
+            return Inertia::render('document/incoming/create', [
+                'offices' => $offices,
+                'documentTypes' => $documentTypes,
+            ]);
         } catch (\Exception $e) {
             Log::error('Document Create Error: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
@@ -58,8 +69,19 @@ class IncomingController extends Controller
     {
         try {
             $document = Document::with('incomingDocument')->findOrFail($id);
-            Log::info('Documents:', ['documents' => $document]);
-            return Inertia::render('document/incoming/edit', ['document' => $document]);
+            $offices = Offices::select('id', 'name', 'code')
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->get();
+            $documentTypes = DocumentTypes::select('id', 'name', 'code')
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->get();
+            return Inertia::render('document/incoming/edit', [
+                'document' => $document,
+                'offices' => $offices,
+                'documentTypes' => $documentTypes,
+            ]);
         } catch (\Exception $e) {
             Log::error('Document Edit Error: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
@@ -121,10 +143,10 @@ class IncomingController extends Controller
                 'title_subject' => 'required|string',
                 'docs_types' => 'required|string',
                 'other_ref_no' => 'nullable|string',
-                'date_time_received' => 'required',
-                'from_office_department_unit' => 'required',
-                'sender_name' => 'required',
-                'instructions_action_requested' => 'required',
+                'date_time_received' => 'required|date',
+                'from_office_department_unit' => 'required|string',
+                'sender_name' => 'required|string',
+                'instructions_action_requested' => 'required|string',
             ]);
 
             $document = Document::with('incomingDocument', 'outgoingDocument')->findOrFail($id);
@@ -144,9 +166,7 @@ class IncomingController extends Controller
             return redirect()->route('incoming-documents.index')->with('success', 'Updated document successfully');
         } catch (\Exception $e) {
             Log::error('Document Update Error: ' . $e->getMessage());
-            return redirect()->back()
-                ->with('error', 'Failed to update document: ' . $e->getMessage())
-                ->withInput();
+            return redirect()->back()->with('error', 'Failed to update document: ' . $e->getMessage());
         }
     }
 
@@ -162,7 +182,7 @@ class IncomingController extends Controller
             // Find the document
             $document = Document::findOrFail($request->document_id);
             // Create outgoing document record
-            $outgoing = OutgoingDocument::create([
+            OutgoingDocument::create([
                 'document_id' => $request->document_id,
                 'date_released' => $request->date_released,
                 'forwarded_to_office_department_unit' => $request->forwarded_to_office_department_unit,
@@ -180,6 +200,19 @@ class IncomingController extends Controller
         } catch (\Exception $e) {
             Log::error('Document Release Error: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+    public function getOfficesForReleaseDialog()
+    {
+        try {
+            $offices = Offices::select('id', 'name', 'code')
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->get();
+            return response()->json($offices);
+        } catch (\Exception $e) {
+            Log::error('Error fetching offices: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 422);
         }
     }
     public function destroy(Document $document)
