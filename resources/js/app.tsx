@@ -7,6 +7,15 @@ import { initializeTheme } from './hooks/use-appearance';
 import { Toaster } from 'sonner';
 import $ from 'jquery';
 import 'datatables.net-dt/js/dataTables.dataTables';
+import axios from 'axios';
+
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+if (csrfToken) {
+    axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+} else {
+    console.error('CSRF token not found in meta tag');
+}
 
 // Make jQuery available globally
 window.$ = $;
