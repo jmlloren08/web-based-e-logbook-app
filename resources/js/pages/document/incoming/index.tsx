@@ -202,7 +202,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                                             )}
                                         </div>
                                     </TableHead>
-                                    <TableHead className="cursor-pointer" onClick={() => handleSort('title_subject')}>
+                                    <TableHead className="cursor-pointer w-64 max-w-xs" onClick={() => handleSort('title_subject')}>
                                         <div className="flex items-center gap-1">
                                             Title/Subject
                                             <ArrowUpDown className="h-4 w-4" />
@@ -280,7 +280,11 @@ export default function Index({ documents }: { documents: PaginatedResults<Incom
                                                 {doc.document_no} | {doc.incoming_document.date_time_received}
                                             </div>
                                         </TableCell>
-                                        <TableCell>{doc.title_subject}</TableCell>
+                                        <TableCell className="w-64 max-w-xs overflow-hidden truncate">
+                                            <div className="truncate" title={doc.title_subject}>
+                                                {doc.title_subject}
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="hidden sm:table-cell">{doc.docs_types}</TableCell>
                                         <TableCell className="hidden lg:table-cell">
                                             {doc.incoming_document.instructions_action_requested}

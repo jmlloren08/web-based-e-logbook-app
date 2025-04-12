@@ -55,6 +55,14 @@ export default function RemarksIndex({ remarks }: { remarks: PaginatedResults<Re
         setIsShowRemarksDialogOpen(true);
     }
 
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+        router.get(route('remarks.index'), { search: e.target.value }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    }
+
     const handleDeleteClick = (remark: Remarks) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -72,14 +80,7 @@ export default function RemarksIndex({ remarks }: { remarks: PaginatedResults<Re
             }
         });
     }
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        router.get(route('remarks.index'), { search: e.target.value }, {
-            preserveState: true,
-            preserveScroll: true
-        });
-    }
-
+    
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Remarks" />

@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,6 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { Remarks } from '@/types';
-import { Inertia } from '@inertiajs/inertia';
 import { useEffect } from 'react';
 
 interface EditRemarksDialogProps {
@@ -40,9 +39,8 @@ export default function EditRemarksDialog({ open, onOpenChange, remark }: EditRe
             onSuccess: () => {
                 onOpenChange(false);
                 reset();
-                Inertia.reload({
+                router.reload({
                     only: ['remarks'],
-                    preserveState: true,
                 });
             }
         });
