@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { FileInput } from 'lucide-react';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import InputError from '@/components/input-error';
 import { cn } from '@/lib/utils';
-import { Inertia } from '@inertiajs/inertia';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import axios from 'axios';
 
@@ -27,28 +26,6 @@ export default function Release({ docId }: { docId: string }) {
         forwarded_to_office_department_unit: '',
     });
 
-    const handleRelease = async () => {
-        // Validate fields before submission
-        if (!data.date_released || !data.forwarded_to_office_department_unit) {
-            return;
-        }
-        // Proceed with form submission
-        await post(route('incoming-documents.release', docId), {
-            preserveScroll: true,
-            preserveState: true,
-            onSuccess: () => {
-                Inertia.reload({
-                    only: ['documents'],
-                    preserveState: true
-                });
-                setOpen(false);
-            },
-            onError: () => {
-                console.log('Form submission errors: ', errors);
-            }
-        });
-    }
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -60,6 +37,23 @@ export default function Release({ docId }: { docId: string }) {
         }
         fetchData();
     }, []);
+
+    const handleRelease = async () => {
+        // Validate fields before submission
+        if (!data.date_released || !data.forwarded_to_office_department_unit) {
+            return;
+        }
+        // Proceed with form submission
+        await post(route('incoming-documents.release', docId), {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                router.reload({
+                    only: ['documents'],
+                });
+            }
+        });
+    }
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
@@ -89,6 +83,7 @@ export default function Release({ docId }: { docId: string }) {
                             <div>
                                 <Input
                                     id='date_released'
+                                    autoFocus
                                     type='date'
                                     value={data.date_released}
                                     onChange={(e) => setData('date_released', e.target.value)}

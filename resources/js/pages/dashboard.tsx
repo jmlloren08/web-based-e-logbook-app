@@ -4,7 +4,6 @@ import { BreadcrumbItem } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -38,7 +37,7 @@ export default function Dashboard({ stats, recentDocuments }: {
         count: number;
     }>;
 }) {
-    
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -87,7 +86,7 @@ export default function Dashboard({ stats, recentDocuments }: {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Document No.</TableHead>
-                                            <TableHead>Title/Subject</TableHead>
+                                            <TableHead className="w-64 max-w-xs">Title/Subject</TableHead>
                                             <TableHead>Type</TableHead>
                                             <TableHead>CREATED_AT</TableHead>
                                         </TableRow>
@@ -96,7 +95,11 @@ export default function Dashboard({ stats, recentDocuments }: {
                                         {recentDocuments.all.map((doc, index) => (
                                             <TableRow key={index}>
                                                 <TableCell>{doc.document_no}</TableCell>
-                                                <TableCell>{doc.title_subject}</TableCell>
+                                                <TableCell className="w-64 max-w-xs overflow-hidden truncate">
+                                                    <div className="truncate" title={doc.title_subject}>
+                                                        {doc.title_subject}
+                                                    </div>
+                                                </TableCell>
                                                 <TableCell>{doc.docs_types}</TableCell>
                                                 <TableCell>{new Date(doc.date).toLocaleString()}</TableCell>
                                             </TableRow>
@@ -109,7 +112,7 @@ export default function Dashboard({ stats, recentDocuments }: {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Document No.</TableHead>
-                                            <TableHead>Title/Subject</TableHead>
+                                            <TableHead className="w-64 max-w-xs">Title/Subject</TableHead>
                                             <TableHead>Type</TableHead>
                                             <TableHead>Date and Time Received</TableHead>
                                         </TableRow>
@@ -118,7 +121,11 @@ export default function Dashboard({ stats, recentDocuments }: {
                                         {recentDocuments.incoming.map((doc, index) => (
                                             <TableRow key={index}>
                                                 <TableCell>{doc.document_no}</TableCell>
-                                                <TableCell>{doc.title_subject}</TableCell>
+                                                <TableCell className="w-64 max-w-xs overflow-hidden truncate">
+                                                    <div className="truncate" title={doc.title_subject}>
+                                                        {doc.title_subject}
+                                                    </div>
+                                                </TableCell>
                                                 <TableCell>{doc.docs_types}</TableCell>
                                                 <TableCell>{new Date(doc.date).toLocaleString()}</TableCell>
                                             </TableRow>
@@ -131,7 +138,7 @@ export default function Dashboard({ stats, recentDocuments }: {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Document No.</TableHead>
-                                            <TableHead>Title/Subject</TableHead>
+                                            <TableHead className="w-64 max-w-xs">Title/Subject</TableHead>
                                             <TableHead>Type</TableHead>
                                             <TableHead>Date and Time Released</TableHead>
                                         </TableRow>
@@ -140,7 +147,11 @@ export default function Dashboard({ stats, recentDocuments }: {
                                         {recentDocuments.outgoing.map((doc, index) => (
                                             <TableRow key={index}>
                                                 <TableCell>{doc.document_no}</TableCell>
-                                                <TableCell>{doc.title_subject}</TableCell>
+                                                <TableCell className="w-64 max-w-xs overflow-hidden truncate">
+                                                    <div className="truncate" title={doc.title_subject}>
+                                                        {doc.title_subject}
+                                                    </div>
+                                                </TableCell>
                                                 <TableCell>{doc.docs_types}</TableCell>
                                                 <TableCell>{new Date(doc.date).toLocaleString()}</TableCell>
                                             </TableRow>

@@ -5,65 +5,35 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import InputError from '@/components/input-error';
 import SignatureCanvas from 'react-signature-canvas';
-import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { FileOutput } from 'lucide-react';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import Swal from 'sweetalert2';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import axios from 'axios';
 
-export default function Receive({ docId, documentNo, docTitleSubject }: { docId: string; documentNo: string; docTitleSubject: string }) {
+interface BulkReceiveProps {
+    documentIds: string[];
+    onClose: () => void;
+}
 
+export default function BulkReceive({ documentIds, onClose }: BulkReceiveProps) {
     const [recipients, setRecipients] = useState([]);
     const [remarks, setRemarks] = useState([]);
-    const [open, setOpen] = useState(false);
     const signaturePadRef = useRef<SignatureCanvas | null>(null);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
     const { data, setData, processing, errors } = useForm({
         received_by: '',
         date_time_received: '',
         remarks: '',
         signature_path: '',
+        document_ids: documentIds,
     });
-    // Ensure canvas clears when dialog opens
+
     useEffect(() => {
-        if (open && signaturePadRef.current) {
-            signaturePadRef.current.clear();
-        }
-    }, [open]);
-
-    const handleOpenChange = (isOpen: boolean) => {
-        setOpen(isOpen);
-        if (isOpen && signaturePadRef.current) {
-            signaturePadRef.current.clear();
-        }
-    }
-
-    const clearSignature = () => {
         if (signaturePadRef.current) {
             signaturePadRef.current.clear();
         }
-    }
-
-    useEffect(() => {
-        const fetchRecipients = async () => {
-            try {
-                const response = await axios.get('/auth/verified/get-recipients-for-receive');
-                setRecipients(response.data);
-            } catch (error) {
-                console.error('Error fetching recipients: ', error);
-            }
-        }
-        const fetchRemarks = async () => {
-            try {
-                const response = await axios.get('/auth/verified/get-remarks-for-receive');
-                setRemarks(response.data);
-            } catch (error) {
-                console.error('Error fetching remarks: ', error);
-            }
-        }
-        fetchRemarks();
-        fetchRecipients();
     }, []);
 
     const handleSubmit = async () => {
@@ -104,6 +74,10 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                 formData.append(key, value.toString());
             }
         });
+        // Add document_ids as an array
+        documentIds.forEach(id => {
+            formData.append('document_ids[]', id);
+        });
         // Handle signature if exists
         if (signaturePadRef.current && !signaturePadRef.current.isEmpty()) {
             // Convert signature to blob
@@ -118,34 +92,50 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
             const signatureFile = new File([file], 'signature.png', { type: 'image/png' });
             formData.append('signature_path', signatureFile);
         }
-        await router.post(route('outgoing-documents.update', { id: docId }), formData, {
+        await router.post(route('outgoing-documents.receive-bulk-documents'), formData, {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
-                router.reload({
-                    only: ['documents'],
-                });
+                Swal.close();
+                onClose();
             }
         });
     }
 
+    const clearSignature = () => {
+        if (signaturePadRef.current) {
+            signaturePadRef.current.clear();
+        }
+    }
+
+    useEffect(() => {
+        const fetchRecipients = async () => {
+            try {
+                const response = await axios.get('/auth/verified/get-recipients-for-receive');
+                setRecipients(response.data);
+            } catch (error) {
+                console.error('Error fetching recipients: ', error);
+            }
+        }
+        const fetchRemarks = async () => {
+            try {
+                const response = await axios.get('/auth/verified/get-remarks-for-receive');
+                setRemarks(response.data);
+            } catch (error) {
+                console.error('Error fetching remarks: ', error);
+            }
+        }
+        fetchRemarks();
+        fetchRecipients();
+    }, []);
+
     return (
-        <AlertDialog open={open} onOpenChange={handleOpenChange}>
-            <AlertDialogTrigger asChild>
-                <Button
-                    variant="default"
-                    size="sm"
-                    className='hover:bg-blue-600 active:scale-95'
-                    title='Receive Document'
-                >
-                    <FileOutput />
-                </Button>
-            </AlertDialogTrigger>
+        <AlertDialog open={true} onOpenChange={onClose}>
             <AlertDialogContent className='sm:max-w-[600px] max-h-[90vh] overflow-y-auto'>
                 <AlertDialogHeader className='mb-4'>
-                    <AlertDialogTitle className='text-xl font-bold text-gray-800'>{documentNo}</AlertDialogTitle>
+                    <AlertDialogTitle className='text-xl font-bold text-gray-800'>Bulk Receive Documents</AlertDialogTitle>
                     <AlertDialogDescription className='text-sm text-muted-foreground'>
-                        {docTitleSubject}
+                        Receiving {documentIds.length} documents
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <div className="space-y-6">
@@ -245,7 +235,7 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => setOpen(false)}
+                            onClick={onClose}
                             className="w-full md:w-auto active:scale-95"
                             disabled={processing}
                         >
@@ -286,7 +276,7 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
                                     Receiving...
                                 </span>
                             ) : (
-                                "Receive Document"
+                                "Receive Documents"
                             )}
                         </Button>
                     </AlertDialogFooter>
@@ -294,4 +284,4 @@ export default function Receive({ docId, documentNo, docTitleSubject }: { docId:
             </AlertDialogContent>
         </AlertDialog>
     );
-}
+} 

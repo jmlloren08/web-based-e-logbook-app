@@ -5,11 +5,13 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useEffect, useState } from "react";
 import Receive from "./receive";
+import BulkReceive from "./bulk-receive";
 import { Input } from "@/components/ui/input";
 import { Search, ArrowUpDown, ArrowLeftIcon, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Swal from "sweetalert2";
+import { Checkbox as ShadcnCheckbox } from "@/components/ui/checkbox";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -45,22 +47,8 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [activeTab, setActiveTab] = useState('all');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-
-    useEffect(() => {
-        if (flash?.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: flash.success
-            });
-        } else if (flash?.error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: flash.error
-            });
-        }
-    }, [flash]);
+    const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+    const [showBulkReceive, setShowBulkReceive] = useState(false);
 
     // Debounce search query to avoid too many requests
     useEffect(() => {
@@ -118,6 +106,40 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
         }
     });
 
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            setSelectedDocuments(sortedDocuments
+                .filter(doc => !doc.outgoing_document.received_by)
+                .map(doc => doc.id));
+        } else {
+            setSelectedDocuments([]);
+        }
+    };
+
+    const handleSelectDocument = (docId: string, checked: boolean) => {
+        if (checked) {
+            setSelectedDocuments([...selectedDocuments, docId]);
+        } else {
+            setSelectedDocuments(selectedDocuments.filter(id => id !== docId));
+        }
+    }
+
+    useEffect(() => {
+        if (flash?.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: flash.success
+            });
+        } else if (flash?.error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: flash.error
+            });
+        }
+    }, [flash]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Outgoing" />
@@ -140,6 +162,15 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                                     className="pl-8"
                                 />
                             </div>
+                            {selectedDocuments.length > 0 && (
+                                <Button
+                                    variant="default"
+                                    onClick={() => setShowBulkReceive(true)}
+                                    className="w-full sm:w-auto"
+                                >
+                                    Bulk Receive ({selectedDocuments.length})
+                                </Button>
+                            )}
                         </div>
                     </div>
 
@@ -163,6 +194,13 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                         <Table className="w-full">
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>
+                                        <ShadcnCheckbox
+                                            checked={selectedDocuments.length === sortedDocuments.filter(doc => !doc.outgoing_document.received_by).length}
+                                            onCheckedChange={handleSelectAll}
+                                            aria-label="Select all"
+                                        />
+                                    </TableHead>
                                     <TableHead></TableHead>
                                     <TableHead className="hidden sm:table-cell cursor-pointer" onClick={() => handleSort('document_no')}>
                                         <div className="flex items-center gap-1">
@@ -217,6 +255,15 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                                 {sortedDocuments.map((doc) => (
                                     <TableRow key={doc.id} className="hover:bg-gray-50">
                                         <TableCell>
+                                            {!doc.outgoing_document.received_by && (
+                                                <ShadcnCheckbox
+                                                    checked={selectedDocuments.includes(doc.id)}
+                                                    onCheckedChange={(checked) => handleSelectDocument(doc.id, checked as boolean)}
+                                                    aria-label={`Select document ${doc.document_no}`}
+                                                />
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
                                             <div className="flex items-center gap-2">
                                                 {!doc.outgoing_document.received_by ? (
                                                     <Receive
@@ -269,7 +316,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                                         <TableCell className="hidden lg:table-cell">
                                             {doc.outgoing_document.signature_path ? (
                                                 <img
-                                                    src={`/public/public/${doc.outgoing_document.signature_path}`}
+                                                    src={`/storage/${doc.outgoing_document.signature_path}`}
                                                     className="h-8 w-auto object-contain"
                                                     alt="Signature"
                                                 />
@@ -323,6 +370,16 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                     </div>
                 </div>
             </div>
+
+            {showBulkReceive && (
+                <BulkReceive
+                    documentIds={selectedDocuments}
+                    onClose={() => {
+                        setShowBulkReceive(false);
+                        setSelectedDocuments([]);
+                    }}
+                />
+            )}
         </AppLayout>
     );
 }

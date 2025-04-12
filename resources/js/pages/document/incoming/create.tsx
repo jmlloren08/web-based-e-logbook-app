@@ -41,7 +41,7 @@ interface Props {
 }
 
 export default function Create({ offices, documentTypes }: Props) {
-    
+
     const { flash } = usePage().props as { flash?: { error?: string } };
     const { data, setData, post, processing, errors } = useForm<IncomingDocument>({
         type: 'incoming',
@@ -111,7 +111,6 @@ export default function Create({ offices, documentTypes }: Props) {
                                                 id="document_no"
                                                 value={data.document_no}
                                                 onChange={(e) => setData('document_no', e.target.value)}
-                                                className="mt-1"
                                                 required
                                             />
                                             <InputError message={errors.document_no} />
@@ -136,7 +135,7 @@ export default function Create({ offices, documentTypes }: Props) {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            <InputError message={errors.type} className="mt-2" />
+                                            <InputError message={errors.docs_types} />
                                         </div>
 
                                         <div className="col-span-1">
@@ -147,7 +146,6 @@ export default function Create({ offices, documentTypes }: Props) {
                                                 id="other_ref_no"
                                                 value={data.other_ref_no}
                                                 onChange={(e) => setData('other_ref_no', e.target.value)}
-                                                className="mt-1"
                                             />
                                             <InputError message={errors.other_ref_no} />
                                         </div>
