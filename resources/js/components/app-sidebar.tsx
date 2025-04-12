@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, FileInput, FileOutput, ArchiveIcon, Archive, Building, SquareUserRound, MessageSquareText } from 'lucide-react';
+import { LayoutGrid, FileInput, FileOutput, ArchiveIcon, Archive, Building, SquareUserRound, MessageSquareText, FileText } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavDocument } from './nav-document';
 import { NavOffice } from './nav-office';
@@ -29,6 +29,29 @@ const documentNavItems: NavItem[] = [
         href: route('outgoing-documents.index'),
         icon: FileOutput,
     },
+];
+
+const manageNavItems: NavItem[] = [
+    {
+        title: 'Offices',
+        href: route('offices.index'),
+        icon: Building,
+    },
+    {
+        title: 'Document Types',
+        href: route('document-types.index'),
+        icon: FileText,
+    },
+    {
+        title: 'Recipients',
+        href: route('recipients.index'),
+        icon: SquareUserRound,
+    },
+    {
+        title: 'Remarks',
+        href: route('remarks.index'),
+        icon: MessageSquareText,
+    }
 ];
 
 const officeNavItems: NavItem[] = [
@@ -79,24 +102,6 @@ const officeNavItems: NavItem[] = [
     },
 ];
 
-const manageNavItems: NavItem[] = [
-    {
-        title: 'Offices',
-        href: '#',
-        icon: Building,
-    },
-    {
-        title: 'Recipients',
-        href: '#',
-        icon: SquareUserRound,
-    },
-    {
-        title: 'Remarks',
-        href: '#',
-        icon: MessageSquareText,
-    }
-]
-
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="sidebar">
@@ -115,8 +120,8 @@ export function AppSidebar() {
                 <ScrollArea>
                     <NavMain items={mainNavItems} />
                     <NavDocument items={documentNavItems} />
-                    <NavOffice items={officeNavItems} />
                     <Manage items={manageNavItems} />
+                    <NavOffice items={officeNavItems} />
                 </ScrollArea>
             </SidebarContent>
             <SidebarFooter>

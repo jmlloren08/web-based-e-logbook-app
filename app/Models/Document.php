@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Document extends Model
 {
@@ -49,7 +50,7 @@ class Document extends Model
         return DocumentHistory::create([
             'document_id' => $this->id,
             'document_state_id' => $stateId,
-            'user_id' => $userId ?? auth()->user()->id,
+            'user_id' => $userId ?? Auth::id(),
             'timestamp' => now(),
             'comments' => $comments,
             'metadata' => $metadata,

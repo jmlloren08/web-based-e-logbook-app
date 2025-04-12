@@ -111,7 +111,7 @@ const DocumentTimeline: React.FC<DocumentTimelineProps> = ({ historyEvents }) =>
                   </div>
                   <div className="mt-2 text-xs text-gray-600">
                     <img
-                      src={`/public/public/${event.metadata.signature_path}`}
+                      src={`/storage/${event.metadata.signature_path}`}
                       alt="Signature"
                       className="w-24"
                     />

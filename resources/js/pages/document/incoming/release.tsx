@@ -1,5 +1,5 @@
-import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { router, useForm } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { FileInput } from 'lucide-react';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
@@ -7,17 +7,36 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import InputError from '@/components/input-error';
 import { cn } from '@/lib/utils';
-import { Inertia } from '@inertiajs/inertia';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import axios from 'axios';
+
+interface Office {
+    id: string;
+    code: string;
+    name: string;
+}
 
 export default function Release({ docId }: { docId: string }) {
 
+    const [offices, setOffices] = useState<Office[]>([]);
     const [open, setOpen] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         document_id: docId,
         date_released: new Date().toISOString().split('T')[0], // default today's date
         forwarded_to_office_department_unit: '',
     });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get('/auth/verified/get-offices-for-release');
+                setOffices(response.data);
+            } catch (error) {
+                console.error('Error fetching offices: ', error);
+            }
+        }
+        fetchData();
+    }, []);
 
     const handleRelease = async () => {
         // Validate fields before submission
@@ -29,14 +48,9 @@ export default function Release({ docId }: { docId: string }) {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
-                Inertia.reload({
+                router.reload({
                     only: ['documents'],
-                    preserveState: true
                 });
-                setOpen(false);
-            },
-            onError: () => {
-                console.log('Form submission errors: ', errors);
             }
         });
     }
@@ -69,6 +83,7 @@ export default function Release({ docId }: { docId: string }) {
                             <div>
                                 <Input
                                     id='date_released'
+                                    autoFocus
                                     type='date'
                                     value={data.date_released}
                                     onChange={(e) => setData('date_released', e.target.value)}
@@ -95,18 +110,11 @@ export default function Release({ docId }: { docId: string }) {
                                         <SelectValue placeholder="Select a office/department/unit" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="ODG">ODG</SelectItem>
-                                        <SelectItem value="ODDGO">ODDGO</SelectItem>
-                                        <SelectItem value="ODDGL">ODDGL</SelectItem>
-                                        <SelectItem value="ODDGAF">ODDGAF</SelectItem>
-                                        <SelectItem value="BRO">BRO</SelectItem>
-                                        <SelectItem value="CMEO">CMEO</SelectItem>
-                                        <SelectItem value="DBD">DBD</SelectItem>
-                                        <SelectItem value="RMTD">RMTD</SelectItem>
-                                        <SelectItem value="RFO">RFO</SelectItem>
-                                        <SelectItem value="SULONG">SULONG</SelectItem>
-                                        <SelectItem value="ADMIN">ADMIN</SelectItem>
-                                        <SelectItem value="FINANCE">FINANCE</SelectItem>
+                                        {offices.map((office) => (
+                                            <SelectItem key={office.id} value={office.code}>
+                                                {office.code}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                                 <InputError message={errors.forwarded_to_office_department_unit} />
