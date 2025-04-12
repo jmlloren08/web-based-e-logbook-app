@@ -62,6 +62,14 @@ export default function DocumentTypesIndex({ documentTypes }: { documentTypes: P
         setIsShowDialogDTOpen(true);
     };
 
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+        router.get(route('document-types.index'), { search: e.target.value }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    }
+
     const handleDeleteClick = (documentType: DocumentTypes) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -78,15 +86,7 @@ export default function DocumentTypesIndex({ documentTypes }: { documentTypes: P
                 });
             }
         });
-    };
-
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        router.get(route('document-types.index'), { search: e.target.value }, {
-            preserveState: true,
-            preserveScroll: true
-        });
-    };
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

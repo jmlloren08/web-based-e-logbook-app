@@ -63,6 +63,14 @@ export default function OfficeIndex({ offices }: { offices: PaginatedResults<Off
         setIsShowDialogOpen(true);
     }
 
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+        router.get(route('offices.index'), { search: e.target.value }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    }
+
     const handleDeleteClick = (office: Offices) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -79,15 +87,7 @@ export default function OfficeIndex({ offices }: { offices: PaginatedResults<Off
                 });
             }
         });
-    };
-
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        router.get(route('offices.index'), { search: e.target.value }, {
-            preserveState: true,
-            preserveScroll: true
-        });
-    };
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

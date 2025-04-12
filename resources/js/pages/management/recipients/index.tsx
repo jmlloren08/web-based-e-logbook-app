@@ -55,6 +55,14 @@ export default function RecipientsIndex({ recipients }: { recipients: PaginatedR
         setIsShowDialogROpen(true);
     }
 
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+        router.get(route('recipients.index'), { search: e.target.value }, {
+            preserveState: true,
+            preserveScroll: true
+        });
+    }
+
     const handleDeleteClick = (recipient: Recipients) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -70,13 +78,6 @@ export default function RecipientsIndex({ recipients }: { recipients: PaginatedR
                     preserveScroll: true,
                 });
             }
-        });
-    }
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        router.get(route('recipients.index'), { search: e.target.value }, {
-            preserveState: true,
-            preserveScroll: true
         });
     }
 
