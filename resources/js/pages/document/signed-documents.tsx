@@ -4,19 +4,16 @@ import AppLayout from "@/layouts/app-layout";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useEffect, useState } from "react";
-import Receive from "./receive";
-import BulkReceive from "./bulk-receive";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowUpDown, ArrowLeftIcon, EyeIcon } from "lucide-react";
+import { Search, ArrowUpDown, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Swal from "sweetalert2";
-import { Checkbox as ShadcnCheckbox } from "@/components/ui/checkbox";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Outgoing',
-        href: route('outgoing-documents.index'),
+        title: 'Signed Documents',
+        href: route('signed-documents.index'),
     },
 ];
 
@@ -47,8 +44,6 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [activeTab, setActiveTab] = useState('all');
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-    const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
-    const [showBulkReceive, setShowBulkReceive] = useState(false);
 
     // Debounce search query to avoid too many requests
     useEffect(() => {
@@ -62,7 +57,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
     // Trigger search when debounced query changes
     useEffect(() => {
         router.get(
-            route('outgoing-documents.index'),
+            route('signed-documents.index'),
             { search: debouncedSearchQuery, tab: activeTab },
             { preserveState: true, preserveScroll: true }
         );
@@ -106,24 +101,6 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
         }
     });
 
-    const handleSelectAll = (checked: boolean) => {
-        if (checked) {
-            setSelectedDocuments(sortedDocuments
-                .filter(doc => !doc.outgoing_document.received_by)
-                .map(doc => doc.id));
-        } else {
-            setSelectedDocuments([]);
-        }
-    };
-
-    const handleSelectDocument = (docId: string, checked: boolean) => {
-        if (checked) {
-            setSelectedDocuments([...selectedDocuments, docId]);
-        } else {
-            setSelectedDocuments(selectedDocuments.filter(id => id !== docId));
-        }
-    }
-
     useEffect(() => {
         if (flash?.success) {
             Swal.fire({
@@ -142,7 +119,7 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Outgoing" />
+            <Head title="Signed Documents" />
             <div className="container max-w-full mx-auto px-4 py-6 sm:px-6 lg:px-8">
                 <div className="bg-white shadow-md rounded-xl overflow-hidden">
                     <div className="p-4 border-b border-gray-200">
@@ -156,15 +133,6 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                                     className="pl-8"
                                 />
                             </div>
-                            {selectedDocuments.length > 0 && (
-                                <Button
-                                    variant="default"
-                                    onClick={() => setShowBulkReceive(true)}
-                                    className="w-full sm:w-auto"
-                                >
-                                    Bulk Receive ({selectedDocuments.length})
-                                </Button>
-                            )}
                         </div>
                     </div>
 
@@ -188,13 +156,6 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                         <Table className="w-full">
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>
-                                        <ShadcnCheckbox
-                                            checked={selectedDocuments.length === sortedDocuments.filter(doc => !doc.outgoing_document.received_by).length}
-                                            onCheckedChange={handleSelectAll}
-                                            aria-label="Select all"
-                                        />
-                                    </TableHead>
                                     <TableHead></TableHead>
                                     <TableHead className="hidden sm:table-cell cursor-pointer" onClick={() => handleSort('document_no')}>
                                         <div className="flex items-center gap-1">
@@ -249,34 +210,16 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                                 {sortedDocuments.map((doc) => (
                                     <TableRow key={doc.id} className="hover:bg-gray-50">
                                         <TableCell>
-                                            {!doc.outgoing_document.received_by && (
-                                                <ShadcnCheckbox
-                                                    checked={selectedDocuments.includes(doc.id)}
-                                                    onCheckedChange={(checked) => handleSelectDocument(doc.id, checked as boolean)}
-                                                    aria-label={`Select document ${doc.document_no}`}
-                                                />
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                {!doc.outgoing_document.received_by && (
-                                                    <Receive
-                                                        docId={doc.id}
-                                                        documentNo={doc.document_no}
-                                                        docTitleSubject={doc.title_subject}
-                                                    />
-                                                )}
-                                                <Link href={route('outgoing-documents.show', { id: doc.id })}>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className='hover:text-blue-600 active:scale-95'
-                                                        title='View Document'
-                                                    >
-                                                        <EyeIcon />
-                                                    </Button>
-                                                </Link>
-                                            </div>
+                                            <Link href={route('outgoing-documents.show', { id: doc.id })}>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className='hover:text-blue-600 active:scale-95'
+                                                    title='View Document'
+                                                >
+                                                    <EyeIcon />
+                                                </Button>
+                                            </Link>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">
                                             {doc.document_no}
@@ -363,16 +306,6 @@ export default function Index({ documents }: { documents: PaginatedResults<Outgo
                     </div>
                 </div>
             </div>
-
-            {showBulkReceive && (
-                <BulkReceive
-                    documentIds={selectedDocuments}
-                    onClose={() => {
-                        setShowBulkReceive(false);
-                        setSelectedDocuments([]);
-                    }}
-                />
-            )}
         </AppLayout>
     );
 }

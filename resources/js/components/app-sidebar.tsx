@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, FileInput, FileOutput, ArchiveIcon, Archive, Building, SquareUserRound, MessageSquareText, FileText } from 'lucide-react';
+import { LayoutGrid, FileInput, FileOutput, ArchiveIcon, Archive, Building, SquareUserRound, MessageSquareText, FileText, FileCheck } from 'lucide-react';
 import AppLogo from './app-logo';
 import { NavDocument } from './nav-document';
 import { NavOffice } from './nav-office';
@@ -29,6 +29,11 @@ const documentNavItems: NavItem[] = [
         href: route('outgoing-documents.index'),
         icon: FileOutput,
     },
+    {
+        title: 'Signed Documents',
+        href: route('signed-documents.index'),
+        icon: FileCheck,
+    }
 ];
 
 const manageNavItems: NavItem[] = [

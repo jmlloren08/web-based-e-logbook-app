@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/auth/verified/document/{id}/return-document-for', [DocumentController::class, 'returnDocumentFor'])->name('document.return-document-for');
     Route::post('/auth/verified/document/{id}/finalize-document', [DocumentController::class, 'finalizeDocument'])->name('document.finalize-document');
     Route::post('/auth/verified/document/{id}/submit-revision', [DocumentController::class, 'submitRevision'])->name('document.submit-revision');
+    Route::get('/auth/verified/signed-documents', [DocumentController::class, 'signedDocuments'])->name('signed-documents.index');
     // Incoming Documents
     Route::resource('/auth/verified/incoming-documents', IncomingController::class)->except('destroy');
     Route::delete('/auth/verified/incoming-documents/{document}', [IncomingController::class, 'destroy'])->name('incoming-documents.destroy');
@@ -69,9 +70,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
     });
     // Admin-only routes
-    Route::middleware(['admin'])->group(function () {
-        // Route::resource('users', UserController::class);
-    });
+    // Route::middleware(['admin'])->group(function () {
+    //     // Route::resource('users', UserController::class);
+    // });
     // Fallback route
     Route::fallback(function () {
         return Inertia::render('errors/404', ['status' => 404]);
