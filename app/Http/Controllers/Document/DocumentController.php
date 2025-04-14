@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Document;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
-use App\Models\IncomingDocument;
-use App\Models\OutgoingDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class DocumentController extends Controller
 {
@@ -63,7 +62,7 @@ class DocumentController extends Controller
                 'forwarded_to_office_department_unit' => 'required|string',
             ]);
             // Find the document
-            $document = Document::findOrFail($id);
+            $document = Document::with('incomingDocument', 'outgoingDocument')->findOrFail($id);
             // Make sure document is in returned for revision state
             if ($document->current_state_id != 4) { // returned
                 return redirect()->back()->with('error', 'Document is not in revision state');
@@ -74,9 +73,9 @@ class DocumentController extends Controller
                 'docs_types' => $request->docs_types,
             ]);
             // Update the incoming document
-            $incomingDocument = IncomingDocument::where('document_id', $id)->first();
-            if ($incomingDocument) {
-                $incomingDocument->update([
+            // $incomingDocument = IncomingDocument::where('document_id', $id)->first();
+            if ($document->incomingDocument) {
+                $document->incomingDocument->update([
                     'other_ref_no' => $request->other_ref_no,
                     'date_time_received' => $request->date_time_received,
                     'from_office_department_unit' => $request->from_office_department_unit,
@@ -98,19 +97,14 @@ class DocumentController extends Controller
                 'date_released' => $request->date_released,
                 'forwarded_to_office_department_unit' => $request->forwarded_to_office_department_unit,
             ];
-            $outgoingDocument = OutgoingDocument::where('document_id', $id)->first();
-            if ($outgoingDocument) {
-                $outgoingDocument->update([
+            // $outgoingDocument = OutgoingDocument::where('document_id', $id)->first();
+            if ($document->outgoingDocument) {
+                $document->outgoingDocument->update([
+                    'forwarded_to_office_department_unit' => $request->forwarded_to_office_department_unit,
                     'received_by' => null,
                     'date_time_received' => null,
                     'remarks' => null,
                     'signature_path' => null,
-                ]);
-            } else {
-                $outgoingDocument = OutgoingDocument::create([
-                    'document_id' => $id,
-                    'date_released' => $request->date_released,
-                    'forwarded_to_office_department_unit' => $request->forwarded_to_office_department_unit,
                 ]);
             }
             // Send the revised document
@@ -125,7 +119,7 @@ class DocumentController extends Controller
     {
         try {
             $request->validate([
-                'comments' => 'nullable|string|max:255',
+                'comments' => 'nullable|string|max:1000',
             ]);
             // Find the document
             $document = Document::findOrFail($id);
@@ -135,18 +129,47 @@ class DocumentController extends Controller
             }
 
             $metadata = [
+                'finalized_link' => $request->comments,
                 'finalized_by' => auth()->user()->name ?? 'System',
                 'finalized_date' => now()->toDateTimeString(),
             ];
             // Finalize the document
-            $document->finalizeDocument('Document has been finalized and completed: ' . $request->comments, [
-                $metadata,
-            ]);
+            $document->finalizeDocument('Document has been finalized and completed.', $metadata);
 
             return redirect()->route('outgoing-documents.index', $document)->with('success', 'Document has been finalized.');
         } catch (\Exception $e) {
             Log::error('Document Finalize Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error finalizing document: ' . $e->getMessage());
+        }
+    }
+    public function signedDocuments(Request $request)
+    {
+        try {
+            $query = Document::with(['currentState', 'outgoingDocument'])
+                ->whereIn('current_state_id', [6]); // finalized and completed
+            // Handle search if search parameter is provided
+            if ($request->has('search') && !empty($request->search)) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('document_no', 'like', "%{$searchTerm}%")
+                        ->orWhere('title_subject', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('outgoingDocument', function ($q) use ($searchTerm) {
+                            $q->where('forwarded_to_office_department_unit', 'like', "%{$searchTerm}%")
+                                ->orWhere('received_by', 'like', "%{$searchTerm}%")
+                                ->orWhere('remarks', 'like', "%{$searchTerm}%");
+                        });
+                });
+            }
+            // Handle tab filtering if tab parameter is provided and not 'all'
+            if ($request->has('tab') && $request->tab !== 'all') {
+                $tabValue = $request->tab;
+                $query->where('document_no', 'like', "%{$tabValue}%");
+            }
+            $documents = $query->latest('updated_at')->paginate(10);
+            return Inertia::render('document/signed-documents', ['documents' => $documents]);
+        } catch (\Exception $e) {
+            Log::error('Document Index Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 }

@@ -86,7 +86,7 @@ class Document extends Model
         );
     }
     // Helper to finalize document
-    public function finalizeDocument($comments = 'Document has been finalized and completed.', $metadata = [])
+    public function finalizeDocument($comments, $metadata = [])
     {
         // Update document state
         $this->current_state_id = 6; // finalized

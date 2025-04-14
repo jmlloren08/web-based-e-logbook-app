@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -64,6 +65,7 @@ export default function Show({ document, historyEvents }: {
     const [returnReason, setReturnReason] = useState('');
     const [returnComments, setReturnComments] = useState('');
     const [finalizeComments, setFinalizeComments] = useState('');
+    const [reasons, setReasons] = useState([]);
 
     const handleReturnSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -120,17 +122,31 @@ export default function Show({ document, historyEvents }: {
         }
     }, [flash]);
 
+    useEffect(() => {
+        const fetchReasons = async () => {
+            try {
+                const response = await axios.get('/auth/verified/get-remarks-for-receive');
+                setReasons(response.data);
+            } catch (error) {
+                console.error('Error fetching reasons: ', error);
+            }
+        }
+        fetchReasons();
+    }, []);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Show Documents" />
             <div className="max-w-full mx-auto p-6 bg-white shadow-lg rounded-lg">
                 <div className="mb-6 flex justify-between items-center">
-                    <Button variant="outline" asChild className="w-full sm:w-auto">
-                        <Link href={route('outgoing-documents.index')} className="flex items-center justify-center">
-                            <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                            Back to list
-                        </Link>
-                    </Button>
+                    <button
+                        type="button"
+                        onClick={() => window.history.back()}
+                        className="flex items-center justify-center border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50"
+                    >
+                        <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                        Back to list
+                    </button>
                 </div>
 
                 <h1 className="text-2xl font-bold mb-6 text-center">Document Timeline</h1>
@@ -198,20 +214,11 @@ export default function Show({ document, historyEvents }: {
                                             <SelectValue placeholder="Select a reason" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="For Revision">For Revision</SelectItem>
-                                            <SelectItem value="For Correction">For Correction</SelectItem>
-                                            <SelectItem value="For Initial">For Initial</SelectItem>
-                                            <SelectItem value="For Signature">For Signature</SelectItem>
-                                            <SelectItem value="For Approval">For Approval</SelectItem>
-                                            <SelectItem value="For Review">For Review</SelectItem>
-                                            <SelectItem value="For Numbering">For Numbering</SelectItem>
-                                            <SelectItem value="For Appropriate Action">For Appropriate Action</SelectItem>
-                                            <SelectItem value="For Encoding">For Encoding</SelectItem>
-                                            <SelectItem value="For Filing">For Filing</SelectItem>
-                                            <SelectItem value="For Scanning">For Scanning</SelectItem>
-                                            <SelectItem value="For Printing">For Printing</SelectItem>
-                                            <SelectItem value="For Archiving">For Archiving</SelectItem>
-                                            <SelectItem value="Other">Other</SelectItem>
+                                            {reasons.map((reason) => (
+                                                <SelectItem key={reason.id} value={reason.name}>
+                                                    {reason.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -247,12 +254,14 @@ export default function Show({ document, historyEvents }: {
                         <form onSubmit={handleFinalizeSubmit}>
                             <div className="grid gap-4 py-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="finalize-comments">Comments (Optional)</Label>
-                                    <Textarea
+                                    <Label htmlFor="finalize-comments">Attach Link <span className="text-red-500">(Required)</span></Label>
+                                    <input
                                         id="finalize-comments"
-                                        value={finalizeComments}
+                                        type="url"
+                                        value={finalizeComments} // Reusing the state for the link
                                         onChange={(e) => setFinalizeComments(e.target.value)}
-                                        rows={4}
+                                        className="border rounded p-2"
+                                        required
                                     />
                                 </div>
                             </div>

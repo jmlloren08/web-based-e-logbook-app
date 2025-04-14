@@ -25,9 +25,11 @@ interface DocumentTimelineProps {
 
 const DocumentTimeline: React.FC<DocumentTimelineProps> = ({ historyEvents }) => {
   // Sort events by date (newest first)
-  const sortedEvents = [...historyEvents].sort((a, b) =>
-    b.state_id - a.state_id && new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  );
+  const sortedEvents = [...historyEvents].sort((a, b) => {
+    const stateComparison = b.state_id - a.state_id;
+    if (stateComparison !== 0) return stateComparison;
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  });
 
   // Function to get the appropriate icon based on event state
   const getEventIcon = (state: string) => {
@@ -99,11 +101,29 @@ const DocumentTimeline: React.FC<DocumentTimelineProps> = ({ historyEvents }) =>
 
               <p className="mt-1 text-sm">{event.comments}</p>
 
+              {event.metadata && Object.keys(event.metadata).length > 0 && event.state === 'Finalized' && (
+                <div className="mt-2 text-xs text-gray-600">
+                  <span>Attached Link:
+                    <a
+                      href={event.metadata.finalized_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      {event.metadata.finalized_link.length > 50
+                        ? ` ${event.metadata.finalized_link.slice(0, 50)}...`
+                        : event.metadata.finalized_link
+                      }
+                    </a>
+                  </span>
+                </div>
+              )}
               {event.user && Object.keys(event.user).length > 0 && !event.state.includes('Received') && (
                 <div className="mt-2 text-xs text-gray-600">
                   <span>By: {event.user.name || 'Unknown User'}</span>
                 </div>
               )}
+
               {event.metadata && Object.keys(event.metadata).length > 0 && event.state === 'Received' && (
                 <>
                   <div className="mt-2 text-xs text-gray-600">

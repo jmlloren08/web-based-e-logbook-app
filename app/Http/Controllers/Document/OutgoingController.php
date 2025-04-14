@@ -18,7 +18,7 @@ class OutgoingController extends Controller
     {
         try {
             $query = Document::with(['currentState', 'outgoingDocument'])
-                ->whereIn('current_state_id', [2, 3, 6]); // sent, received, finalized
+                ->whereIn('current_state_id', [2, 3]); // sent, received
             // Handle search if search parameter is provided
             if ($request->has('search') && !empty($request->search)) {
                 $searchTerm = $request->search;
