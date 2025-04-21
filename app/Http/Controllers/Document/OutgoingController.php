@@ -105,7 +105,6 @@ class OutgoingController extends Controller
                 'document_ids' => 'required|array',
                 'document_ids.*' => 'required|string|exists:documents,id',
             ]);
-            Log::info('Bulk Update Data: ', $validatedData);
             // Handle signature upload if provided
             if ($request->hasFile('signature_path')) {
                 $signaturePath = $request->file('signature_path')->store('signatures', 'public');

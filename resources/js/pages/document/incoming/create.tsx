@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { BreadcrumbItem, IncomingDocument } from "@/types";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import { ArrowLeftIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { FormEventHandler } from "react";
 import {
@@ -19,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import axios from "axios";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -54,6 +55,65 @@ export default function Create({ offices, documentTypes }: Props) {
         sender_name: '',
         instructions_action_requested: '',
     });
+    const [documentNo, setDocumentNo] = useState('');
+
+    const handleDateChange = (e: string) => {
+        const newDate = e.target.value;
+        setData('date_time_received', newDate);
+        // console.log('Selected date:', newDate);
+        setData('document_no', '');
+        setDocumentNo('');
+        setData('from_office_department_unit', '');
+    }
+
+    const handleOriginOfficeChange = async (value: string) => {
+        setData('from_office_department_unit', value);
+        if (value) {
+            try {
+                // Get the selected date from the form data
+                let selectedDate = '';
+                if (data.date_time_received) {
+                    // Convert the datetime-local to a date string in YYYY-MM-DD format
+                    const date = new Date(data.date_time_received);
+                    selectedDate = date.toISOString().split('T')[0]; // Get the date part only
+                    // console.log('Selected date for document number:', selectedDate);
+                }
+                // Send both the office code and selected date to the backend
+                const response = await axios.get(`/auth/verified/get-new-document-no`, {
+                    params: {
+                        from_office_department_unit: value,
+                        date_received: selectedDate,
+                    }
+                });
+                // Check if the response is JSON
+                if (typeof response.data === 'object') {
+                    const newDocumentNo = response.data && response.data.document_no ? response.data.document_no : '';
+                    setDocumentNo(newDocumentNo);
+                    setData('document_no', newDocumentNo); // Update the form data with the new document number
+                } else {
+                    console.error('Unexpected response format: ', response.data);
+                    setDocumentNo(''); // Reset document number if the format is unexpected
+                    setData('document_no', ''); // Reset form data as well
+                }
+            } catch (error) {
+                console.error('Error fetching document number: ', error);
+                setDocumentNo(''); // Reset document number if there's an error
+                setData('document_no', ''); // Reset form data as well
+            }
+        } else {
+            setDocumentNo(''); // Reset document number if no office is selected
+            setData('document_no', ''); // Reset form data as well
+        }
+    };
+
+    const submit: FormEventHandler = (e) => {
+        e.preventDefault();
+        post(route('incoming-documents.store'), {
+            onSuccess: () => {
+                // Handle success
+            },
+        });
+    }
 
     useEffect(() => {
         if (flash?.error) {
@@ -64,15 +124,6 @@ export default function Create({ offices, documentTypes }: Props) {
             });
         }
     }, [flash]);
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(route('incoming-documents.store'), {
-            onSuccess: () => {
-                // Handle success
-            },
-        });
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -109,8 +160,11 @@ export default function Create({ offices, documentTypes }: Props) {
                                             </Label>
                                             <Input
                                                 id="document_no"
-                                                value={data.document_no}
-                                                onChange={(e) => setData('document_no', e.target.value)}
+                                                value={documentNo}
+                                                onChange={(e) => {
+                                                    setDocumentNo(e.target.value);
+                                                    setData('document_no', e.target.value);
+                                                }}
                                                 required
                                             />
                                             <InputError message={errors.document_no} />
@@ -180,7 +234,7 @@ export default function Create({ offices, documentTypes }: Props) {
                                                 id="date_time_received"
                                                 type="datetime-local"
                                                 value={data.date_time_received}
-                                                onChange={(e) => setData('date_time_received', e.target.value)}
+                                                onChange={handleDateChange}
                                                 className="mt-1"
                                                 required
                                             />
@@ -201,7 +255,7 @@ export default function Create({ offices, documentTypes }: Props) {
                                             </Label>
                                             <Select
                                                 value={data.from_office_department_unit}
-                                                onValueChange={(value) => setData('from_office_department_unit', value)}
+                                                onValueChange={(value) => handleOriginOfficeChange(value)}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select Office/Department/Unit" />

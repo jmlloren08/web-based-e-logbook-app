@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/auth/verified/incoming-documents/{id}/force-delete', [IncomingController::class, 'forceDelete'])->name('incoming-documents.force-delete');
     Route::post('/auth/verified/incoming-documents/release', [IncomingController::class, 'release'])->name('incoming-documents.release');
     Route::get('/auth/verified/get-offices-for-release', [IncomingController::class, 'getOfficesForReleaseDialog'])->name('get-offices-for-release');
+    Route::get('/auth/verified/get-new-document-no', [IncomingController::class, 'generateDocumentNo'])->name('generate.document-no');
     // Outgoing Documents
     Route::patch('/auth/verified/outgoing-documents/receive-bulk-documents', [OutgoingController::class, 'receiveBulkDocuments'])->name('outgoing-documents.receive-bulk-documents');
     Route::put('/auth/verified/outgoing-documents/{id}/modify', [OutgoingController::class, 'modify'])->name('outgoing-documents.modify');

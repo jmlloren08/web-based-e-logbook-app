@@ -96,15 +96,15 @@ export default function Edit({ document, offices, documentTypes }: Props & { doc
                             {/* Revision */}
                             {document.current_state_id === 4 && (
                                 <>
-                                    <h3 className="text-lg font-medium mt-6 mb-3">Revision Details</h3>
+                                    <h3 className="text-lg font-medium mt-6 mb-3">Return Details</h3>
                                     <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200 mb-4">
                                         <p className="text-sm text-yellow-800">
-                                            This document has been returned for revision. Please make the necessary changes and resubmit.
+                                            This document has been returned. Please make the necessary changes and resubmit.
                                         </p>
                                     </div>
 
                                     <div className="mb-4">
-                                        <Label>Revision Comments *</Label>
+                                        <Label>Return Comments *</Label>
                                         <Textarea value={data.revision_comments} onChange={e => setData('revision_comments', e.target.value)} required />
                                     </div>
 
