@@ -165,7 +165,7 @@ export default function Create({ offices, documentTypes }: Props) {
                                                     setDocumentNo(e.target.value);
                                                     setData('document_no', e.target.value);
                                                 }}
-                                                readOnly
+                                                // readOnly
                                                 required
                                             />
                                             <InputError message={errors.document_no} />

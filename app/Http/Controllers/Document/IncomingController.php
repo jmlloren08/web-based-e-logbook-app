@@ -252,25 +252,25 @@ class IncomingController extends Controller
                 'from_office_department_unit' => 'required|string',
                 'date_received' => 'required|date',
             ]);
-            // Log::info('Generating document number for office: ' . $request->from_office_department_unit);
-            // Log::info('Date received: ' . $request->date_received);
+            Log::info('Generating document number for office: ' . $request->from_office_department_unit);
+            Log::info('Date received: ' . $request->date_received);
             $originOffice = $request->from_office_department_unit;
             $dateReceived = $request->has('date_received') ? $request->date_received : now()->format('Y-md');
             $formattedDate = date('Y-md', strtotime($dateReceived));
-            // Log::info('Current date: ' . $formattedDate);
+            Log::info('Current date: ' . $formattedDate);
             // Get the latest document number for the given origin office and today's date
             $latestDocument = Document::where('document_no', 'like', "%{$originOffice}-{$formattedDate}-%")
                 ->latest('document_no')
                 ->first();
-            // Log::info('Latest document number: ' . ($latestDocument ? $latestDocument->document_no : 'None'));
+            Log::info('Latest document number: ' . ($latestDocument ? $latestDocument->document_no : 'None'));
             // Extract the last four digits and increment
             $lastNumber = $latestDocument ? (int) substr($latestDocument->document_no, -4) : 0;
-            // Log::info('Last number extracted: ' . $lastNumber);
+            Log::info('Last number extracted: ' . $lastNumber);
             $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT); // Ensure it's 4 digits
-            // Log::info('New number generated: ' . $newNumber);
+            Log::info('New number generated: ' . $newNumber);
             // Create the new document number
             $newDocumentNo = "{$originOffice}-{$formattedDate}-{$newNumber}";
-            // Log::info('New document number: ' . $newDocumentNo);
+            Log::info('New document number: ' . $newDocumentNo);
             return response()->json(['document_no' => $newDocumentNo]);
         } catch (\Exception $e) {
             Log::error('Document No Generation Error: ' . $e->getMessage());
