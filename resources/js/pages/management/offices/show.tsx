@@ -34,6 +34,11 @@ export default function ShowOfficeDialog({ open, onOpenChange, office }: ShowOff
                     </div>
 
                     <div className="space-y-2">
+                        <Label>Email</Label>
+                        <div className="text-sm text-gray-700">{office.email}</div>
+                    </div>
+
+                    <div className="space-y-2">
                         <Label>Status</Label>
                         <div className="text-sm">
                             <span className={`px-2 py-1 rounded-full text-xs ${

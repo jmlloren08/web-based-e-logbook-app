@@ -17,7 +17,7 @@ class RemarksController extends Controller
     {
         try {
             $remarks = Remarks::select('id', 'name', 'is_active')
-                ->latest('updated_at')
+                ->orderBy('name', 'asc')
                 ->paginate(10);
             return Inertia::render('management/remarks/index', [
                 'remarks' => $remarks

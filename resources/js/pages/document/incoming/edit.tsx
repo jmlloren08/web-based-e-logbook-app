@@ -9,7 +9,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import InputError from "@/components/input-error";
 import Swal from "sweetalert2";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -208,7 +208,10 @@ export default function Edit({ document, offices, documentTypes }: Props & { doc
                                         </SelectTrigger>
                                         <SelectContent>
                                             {offices.map((office) => (
-                                                <SelectItem key={office.id} value={office.code}>
+                                                <SelectItem
+                                                    key={office.id}
+                                                    value={office.name}
+                                                >
                                                     {office.name}
                                                 </SelectItem>
                                             ))}

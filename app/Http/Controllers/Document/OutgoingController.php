@@ -143,7 +143,7 @@ class OutgoingController extends Controller
         try {
             $recipients = Recipients::select('id', 'name', 'code')
                 ->where('is_active', true)
-                ->latest('updated_at')
+                ->orderBy('name', 'asc')
                 ->get();
             return response()->json($recipients);
         } catch (\Exception $e) {
@@ -156,7 +156,7 @@ class OutgoingController extends Controller
         try {
             $remarks = Remarks::select('id', 'name')
                 ->where('is_active', true)
-                ->latest('updated_at')
+                ->orderBy('name', 'asc')
                 ->get();
             return response()->json($remarks);
         } catch (\Exception $e) {

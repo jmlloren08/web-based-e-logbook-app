@@ -13,8 +13,8 @@ class OfficeController extends Controller
     public function index()
     {
         try {
-            $offices = Offices::select('id', 'name', 'code', 'is_active')
-                ->latest('updated_at')
+            $offices = Offices::select('id', 'name', 'code', 'email', 'is_active')
+                ->orderBy('name', 'asc')
                 ->paginate(10);
             return Inertia::render('management/offices/index', [
                 'offices' => $offices
@@ -40,7 +40,8 @@ class OfficeController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'code' => 'required|string|max:50|unique:offices',
+                'code' => 'required|string|max:50',
+                'email' => 'required|string|lowercase|email|max:255|unique:' . Offices::class . '|regex:/^[^@]+@arta\.gov\.ph$/',
                 'is_active' => 'boolean'
             ]);
 
@@ -90,7 +91,8 @@ class OfficeController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'code' => 'required|string|max:50|unique:offices,code,' . $id,
+                'code' => "required|string|max:50|unique:offices,code,{$id}",
+                'email' => 'nullable|string|lowercase|email|max:255|unique:' . Offices::class . '|regex:/^[^@]+@arta\.gov\.ph$/',
                 'is_active' => 'boolean'
             ]);
 

@@ -16,6 +16,7 @@ interface ShowRecipientDialogProps {
 }
 
 export default function ShowRecipientDialog({ open, onOpenChange, recipient }: ShowRecipientDialogProps) {
+    // console.log(recipient);
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[600px]">
@@ -31,6 +32,11 @@ export default function ShowRecipientDialog({ open, onOpenChange, recipient }: S
                     <div className="space-y-2">
                         <Label>Code</Label>
                         <div className="text-sm text-gray-700">{recipient.code}</div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Office</Label>
+                        <div className="text-sm text-gray-700">{recipient.offices.name}</div>
                     </div>
 
                     <div className="space-y-2">

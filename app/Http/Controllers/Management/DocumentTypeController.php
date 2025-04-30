@@ -14,7 +14,7 @@ class DocumentTypeController extends Controller
     {
         try {
             $documentTypes = DocumentTypes::select('id', 'name', 'code', 'is_active')
-                ->latest('updated_at')
+                ->orderBy('name', 'asc')
                 ->paginate(10);
             return Inertia::render('management/documenttypes/index', [
                 'documentTypes' => $documentTypes
@@ -92,7 +92,7 @@ class DocumentTypeController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'code' => 'required|string|max:50|unique:document_types,code,' . $id,
+                'code' => "required|string|max:50|unique:document_types,code,$id",
                 'is_active' => 'boolean'
             ]);
 

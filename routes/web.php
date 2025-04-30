@@ -55,6 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/auth/verified/get-remarks-for-receive', [OutgoingController::class, 'getRemarksForReceive'])->name('get-remarks-for-receive');
     // Management 
     Route::resource('/auth/verified/management/offices', OfficeController::class);
+    Route::get('/auth/verified/get-offices-for-recipient', [RecipientController::class, 'getOfficesForRecipient'])->name('get-offices-for-recipient');
     Route::resource('/auth/verified/management/document-types', DocumentTypeController::class);
     Route::resource('/auth/verified/management/recipients', RecipientController::class);
     Route::resource('/auth/verified/management/remarks', RemarksController::class);

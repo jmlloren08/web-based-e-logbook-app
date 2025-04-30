@@ -119,6 +119,7 @@ export default function OfficeIndex({ offices }: { offices: PaginatedResults<Off
                                 <TableRow>
                                     <TableHead>Name</TableHead>
                                     <TableHead>Code</TableHead>
+                                    <TableHead>Email</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Actions</TableHead>
                                 </TableRow>
@@ -128,6 +129,7 @@ export default function OfficeIndex({ offices }: { offices: PaginatedResults<Off
                                     <TableRow key={office.id}>
                                         <TableCell>{office.name}</TableCell>
                                         <TableCell>{office.code}</TableCell>
+                                        <TableCell>{office.email}</TableCell>
                                         <TableCell>
                                             <span className={`px-2 py-1 rounded-full text-xs ${office.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                                 }`}>

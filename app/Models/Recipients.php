@@ -14,10 +14,14 @@ class Recipients extends Model
     protected $fillable = [
         'name',
         'code',
-        'is_active'
+        'is_active',
+        'office_id'
     ];
-
     protected $casts = [
         'is_active' => 'boolean'
     ];
+    public function offices()
+    {
+        return $this->belongsTo(Offices::class, 'office_id');
+    }
 }
