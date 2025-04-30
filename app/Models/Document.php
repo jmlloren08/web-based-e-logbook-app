@@ -99,4 +99,8 @@ class Document extends Model
             $metadata,
         );
     }
+    public function getNotificationMessage($daysPending)
+    {
+        return "Document {$this->document_no} is {$daysPending} days pending.";
+    }
 }

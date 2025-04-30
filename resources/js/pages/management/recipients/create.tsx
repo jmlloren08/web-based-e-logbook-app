@@ -10,6 +10,9 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface CreateRecipientDialogProps {
     open: boolean;
@@ -21,8 +24,22 @@ export default function CreateRecipientDialog({ open, onOpenChange }: CreateReci
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         code: '',
-        is_active: true
+        is_active: true,
+        office_id: '',
     });
+    const [offices, setOffices] = useState([]);
+
+    useEffect(() => {
+        const fetchOffices = async () => {
+            try {
+                const response = await axios.get('/auth/verified/get-offices-for-recipient');
+                setOffices(response.data);
+            } catch (error) {
+                console.error('Error fetching offices: ', error);
+            }
+        }
+        fetchOffices();
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,6 +81,26 @@ export default function CreateRecipientDialog({ open, onOpenChange }: CreateReci
                         />
                         {errors.code && <p className="text-red-500 text-sm">{errors.code}</p>}
                     </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="office_id">Office</Label>
+                        <Select
+                            onValueChange={(office_id: string) => setData('office_id', office_id)}
+                            defaultValue={data.office_id}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Office" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {offices.map((office) => (
+                                    <SelectItem key={office.id} value={office.id}>
+                                        {office.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     {/* <Optional /> */}
                     <div className="flex items-center space-x-2">
                         <Label htmlFor="is_active">Status</Label>

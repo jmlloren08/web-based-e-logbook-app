@@ -11,7 +11,9 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { Recipients } from '@/types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import axios from 'axios';
 
 interface EditRecipientDialogProps {
     open: boolean;
@@ -20,20 +22,36 @@ interface EditRecipientDialogProps {
 }
 
 export default function EditRecipientDialog({ open, onOpenChange, recipient }: EditRecipientDialogProps) {
+
     const { data, setData, put, processing, errors, reset } = useForm({
         name: recipient.name,
         code: recipient.code,
+        office_id: recipient.offices.id,
         is_active: recipient.is_active
     });
+    const [offices, setOffices] = useState([]);
 
     // Update form data when recipient prop changes
     useEffect(() => {
         setData({
             name: recipient.name,
             code: recipient.code,
+            office_id: recipient.offices.id,
             is_active: recipient.is_active
         });
     }, [recipient]);
+
+    useEffect(() => {
+        const fetchOffices = async () => {
+            try {
+                const response = await axios.get('/auth/verified/get-offices-for-recipient');
+                setOffices(response.data);
+            } catch (error) {
+                console.error('Error fetching offices: ', error);
+            }
+        }
+        fetchOffices();
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,6 +103,26 @@ export default function EditRecipientDialog({ open, onOpenChange, recipient }: E
                             required
                         />
                         {errors.code && <p className="text-red-500 text-sm">{errors.code}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="office_id">Office (Required)</Label>
+                        <Select
+                            value={data.office_id}
+                            onValueChange={(value) => setData('office_id', value)}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Office" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {offices.map((office) => (
+                                    <SelectItem key={office.id} value={office.id}>
+                                        {office.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {errors.office_id && <p className="text-red-500 text-sm">{errors.office_id}</p>}
                     </div>
 
                     <div className="flex items-center space-x-2">

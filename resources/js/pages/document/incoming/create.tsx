@@ -56,19 +56,22 @@ export default function Create({ offices, documentTypes }: Props) {
         instructions_action_requested: '',
     });
     const [documentNo, setDocumentNo] = useState('');
+    const [selectedOffice, setSelectedOffice] = useState('');
 
     const handleDateChange = (e: string) => {
         const newDate = e.target.value;
         setData('date_time_received', newDate);
-        // console.log('Selected date:', newDate);
         setData('document_no', '');
         setDocumentNo('');
         setData('from_office_department_unit', '');
+        setSelectedOffice('');
     }
 
     const handleOriginOfficeChange = async (value: string) => {
-        setData('from_office_department_unit', value);
-        if (value) {
+        setSelectedOffice(value);
+        const [officeId, officeCode, officeName] = value.split('|');
+        setData('from_office_department_unit', officeName);
+        if (officeCode) {
             try {
                 // Get the selected date from the form data
                 let selectedDate = '';
@@ -81,7 +84,7 @@ export default function Create({ offices, documentTypes }: Props) {
                 // Send both the office code and selected date to the backend
                 const response = await axios.get(`/auth/verified/get-new-document-no`, {
                     params: {
-                        from_office_department_unit: value,
+                        from_office_department_unit: officeCode, // Use only the code (e.g., 'CMEO')
                         date_received: selectedDate,
                     }
                 });
@@ -255,7 +258,7 @@ export default function Create({ offices, documentTypes }: Props) {
                                                 From Office/Department/Unit
                                             </Label>
                                             <Select
-                                                value={data.from_office_department_unit}
+                                                value={selectedOffice}
                                                 onValueChange={(value) => handleOriginOfficeChange(value)}
                                             >
                                                 <SelectTrigger>
@@ -263,7 +266,10 @@ export default function Create({ offices, documentTypes }: Props) {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {offices.map((office) => (
-                                                        <SelectItem key={office.id} value={office.code}>
+                                                        <SelectItem
+                                                            key={office.id}
+                                                            value={`${office.id}|${office.code}|${office.name}`}
+                                                        >
                                                             {office.name}
                                                         </SelectItem>
                                                     ))}

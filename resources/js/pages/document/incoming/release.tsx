@@ -111,8 +111,11 @@ export default function Release({ docId }: { docId: string }) {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {offices.map((office) => (
-                                            <SelectItem key={office.id} value={office.code}>
-                                                {office.code}
+                                            <SelectItem
+                                                key={office.id}
+                                                value={office.name}
+                                            >
+                                                {office.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

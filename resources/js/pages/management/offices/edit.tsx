@@ -23,6 +23,7 @@ export default function EditOfficeDialog({ open, onOpenChange, office }: EditOff
     const { data, setData, put, processing, errors, reset } = useForm({
         name: office.name,
         code: office.code,
+        email: office.email,
         is_active: office.is_active
     });
 
@@ -31,6 +32,7 @@ export default function EditOfficeDialog({ open, onOpenChange, office }: EditOff
         setData({
             name: office.name,
             code: office.code,
+            email: office.email,
             is_active: office.is_active
         });
     }, [office]);
@@ -85,6 +87,17 @@ export default function EditOfficeDialog({ open, onOpenChange, office }: EditOff
                             required
                         />
                         {errors.code && <p className="text-red-500 text-sm">{errors.code}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            value={data.email}
+                            onChange={e => setData('email', e.target.value)}
+                        />
+                        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                     </div>
 
                     <div className="flex items-center space-x-2">

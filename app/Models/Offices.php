@@ -14,10 +14,14 @@ class Offices extends Model
     protected $fillable = [
         'name',
         'code',
+        'email',
         'is_active'
     ];
-
     protected $casts = [
         'is_active' => 'boolean'
     ];
+    // public function recipients()
+    // {
+    //     return $this->hasMany(Recipients::class);
+    // }
 }

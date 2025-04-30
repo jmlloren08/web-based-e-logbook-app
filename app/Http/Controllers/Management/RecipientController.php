@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Management;
 
 use App\Http\Controllers\Controller;
+use App\Models\Offices;
 use App\Models\Recipients;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,8 +17,9 @@ class RecipientController extends Controller
     public function index()
     {
         try {
-            $recipients = Recipients::select('id', 'name', 'code', 'is_active')
-                ->latest('updated_at')
+            $recipients = Recipients::select('id', 'name', 'code', 'is_active', 'office_id')
+                ->with('offices')
+                ->orderBy('name', 'asc')
                 ->paginate(10);
             return Inertia::render('management/recipients/index', [
                 'recipients' => $recipients
@@ -34,7 +36,13 @@ class RecipientController extends Controller
     public function create()
     {
         try {
-            return Inertia::render('management/recipients/create');
+            $offices = Offices::select('id', 'name', 'code')
+                ->where('is_active', true)
+                ->orderBy('name', 'asc')
+                ->get();
+            return Inertia::render('management/recipients/create', [
+                'offices' => $offices,
+            ]);
         } catch (\Exception $e) {
             Log::error('Failed to load create recipient page: ' . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
@@ -50,7 +58,8 @@ class RecipientController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'code' => 'required|string|max:50|unique:recipients',
-                'is_active' => 'boolean'
+                'is_active' => 'boolean',
+                'office_id' => 'required|exists:offices,id'
             ]);
 
             Recipients::create($validated);
@@ -68,7 +77,7 @@ class RecipientController extends Controller
     public function show($id)
     {
         try {
-            $recipient = Recipients::findOrFail($id);
+            $recipient = Recipients::with('offices')->findOrFail($id);
             if (!$recipient) {
                 return redirect()->back()->with('error', 'Recipient not found');
             }
@@ -108,8 +117,9 @@ class RecipientController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'code' => 'required|string|max:50|unique:recipients,code,' . $id,
-                'is_active' => 'boolean'
+                'code' => "required|string|max:50|unique:recipients,code,$id",
+                'is_active' => 'boolean',
+                'office_id' => 'required|exists:offices,id'
             ]);
 
             $recipient = Recipients::findOrFail($id);
@@ -120,7 +130,19 @@ class RecipientController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
+    public function getOfficesForRecipient()
+    {
+        try {
+            $offices = Offices::select('id', 'name', 'code')
+                ->where('is_active', true)
+                ->orderBy('name', 'asc')
+                ->get();
+            return response()->json($offices);
+        } catch (\Exception $e) {
+            Log::error('Error fetching recipients: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */

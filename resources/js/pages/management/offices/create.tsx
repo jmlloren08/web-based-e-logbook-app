@@ -17,10 +17,11 @@ interface CreateOfficeDialogProps {
 }
 
 export default function CreateOfficeDialog({ open, onOpenChange }: CreateOfficeDialogProps) {
-    
+
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         code: '',
+        email: '',
         is_active: true
     });
 
@@ -52,7 +53,6 @@ export default function CreateOfficeDialog({ open, onOpenChange }: CreateOfficeD
                         />
                         {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                     </div>
-
                     <div className="space-y-2">
                         <Label htmlFor="code">Code (Required)</Label>
                         <Input
@@ -63,6 +63,16 @@ export default function CreateOfficeDialog({ open, onOpenChange }: CreateOfficeD
                             required
                         />
                         {errors.code && <p className="text-red-500 text-sm">{errors.code}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            name="email"
+                            value={data.email}
+                            onChange={e => setData('email', e.target.value)}
+                        />
+                        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                     </div>
                     {/* <Optional /> */}
                     <div className="flex items-center space-x-2">
